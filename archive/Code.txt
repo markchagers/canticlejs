@@ -1,0 +1,213 @@
+-- �1999-2000 M.C. Hagers, Nijmegen, the Netherlands
+-- use behaviour parameter dialog to adjust settings
+
+property mySprite, myMember, tempMember
+property myOffScreen, destImg
+property thePoints, oldPoints, formule
+property numberOfPts, randomDist, scrollFull, nowScrolling
+property theWidth, theHeight, theRect, lineNumber
+property CAcolors, CAPalette, numColors, CABackColor, oldStageColor
+property maxOverflow, minOverflow
+property updateInterval, myUpdate, scrolling, frameLock
+
+
+on initCA me
+  if the currentSpriteNum > 0 then
+    -- if we're on a sprite, render to it's member
+    mySprite = sprite(the currentSpriteNum)
+    myMember = mySprite.member
+    if myMember.type <> #bitmap then
+      tempRect = mySprite.rect
+      newImage = image(mySprite.width, mySprite.height, 16)
+      tempMember = new(#bitmap)
+      tempMember.image = newImage
+      mySprite.member = tempMember
+      mySprite.rect = tempRect
+    end if
+    destImg = mySprite.member.Image
+  else
+    -- we're a frame script, render to the stage
+    destImg = (the stage).image
+    oldStageColor = destImg.getPixel(0,0)
+  end if
+  
+  -- initialise metrics and offscreen bitmap
+  theWidth = destImg.Width
+  theHeight = destImg.Height
+  theRect = rect(0,0,theWidth, theHeight)  
+  -- this next section looks like crap, but it's because I never know 
+  -- what Director will do when a cast member doesn't exists
+  if symbolP(CAPalette) then
+    set myOffScreen = image(theWidth, theHeight, 8, 0, CAPalette)
+  else if the memberNum of member CAPalette > 0 then
+    set myOffScreen = image(theWidth, theHeight, 8, 0, member(CAPalette))
+  else 
+    set myOffScreen = image(theWidth, theHeight, 8, 0, symbol(CAPalette))
+  end if
+  -- put myOffscreen.paletteref
+  -- initialise display colors
+  initColors me
+  
+  -- initialise line buffer
+  thePoints = []
+  repeat with i = 0 to theWidth + 1
+    add thePoints, 0
+  end repeat
+  -- set up initial points
+  randomDist = true
+  repeat with i = 1 to numberOfPts
+    if randomDist then
+      hoei = random(theWidth + 2)
+    else
+      hoei = i * theWidth / (numberOfPts + 1)
+    end if
+    setAt thePoints, hoei, CAColors.count - 1
+  end repeat
+  
+  -- some other props, to be exposed in dialog later
+  maxOverflow = 1
+  minOverflow = 1
+  
+  -- blank the offscreen bitmap with CAColors[1] (the background color)
+  myOffScreen.fill(rect(0,0,theWidth,theHeight), CAColors[1])
+  -- copy this to the destination image as well
+  destImg.copyPixels(myOffScreen, theRect, theRect)
+  
+  -- set some other properties
+  lineNumber = 0
+  myUpdate = 1
+end initCA
+
+on exitFrame me
+  drawCALine me
+  newCALine me
+  if frameLock then go to the frame
+end exitFrame
+
+on newCALine me
+  -- this calculates a new line from the values in buffer 2 (oldPoints)
+  -- the new values are stored in thePoints, will be drawn by drawCALine
+  repeat with i = 1 to thePoints.count 
+    -- use the selected formula
+    case formule of
+      1:
+        -- /* zeer faksinerend!!*/
+        thePoints[i] = (oldPoints[i] - 1) + 2 * abs(getOldPoint(me, i - 1) - getOldPoint(me, i + 1)) 
+      2:
+        -- /* nog dichter bij amiga programma! */
+        thePoints[i] = abs(oldPoints[i] - 1) * (1 + 2 * abs(getOldPoint(me, i - 1) - getOldPoint(me, i + 1))) 
+      3:
+        -- /* ook wel aardig */
+        thePoints[i] = abs(oldPoints[i] - getOldPoint(me, i - 1) - 1) * abs(oldPoints[i] - getOldPoint(me, i + 1) - 1)
+      4:
+        -- /* wel aardig */
+        thePoints[i] = oldPoints[i] - 1 + getOldPoint(me, i - 1) + getOldPoint(me, i + 1)
+      5:
+        -- /* heel mooi */
+        thePoints[i] = abs(oldPoints[i] - 1 ) + 2 * (getOldPoint(me, i - 1) * getOldPoint(me, i + 1))
+      6:
+        thePoints[i] = abs(oldPoints[i] - 1) + 3 * (getOldPoint(me, i - 1) + getOldPoint(me, i + 1))
+      7:
+        -- /* ! */
+        thePoints[i] = abs(oldPoints[i] - 1 ) + 2 * (getOldPoint(me, i - 1) + getOldPoint(me, i + 1))
+      8:
+        -- /* kerstboom met kaarsjes */
+        thePoints[i] = (1 - oldPoints[i]) + 2 * (getOldPoint(me, i - 1) + getOldPoint(me, i + 1))
+      9:
+        -- /* wel aardig */
+        thePoints[i] = (oldPoints[i] + getOldPoint(me, i - 1) + getOldPoint(me, i + 1)) / 3
+    end case
+    
+    -- bounds checking and appropriate action on over- or underflow
+    if thePoints[i] > CAColors.count - 1 then
+      case maxOverflow of
+        1: thePoints[i] = 0
+        2: thePoints[i] = thePoints[i] - CAColors.count + 1
+        3: thePoints[i] = oldPoints[i] 
+        4: thePoints[i] = CAColors.count - 1
+        5: thePoints[i] = CAColors.count - (thePoints[i] - CAColors.count)
+      end case
+    else if thePoints[i] < 0 then
+      case minOverflow of
+        1: thePoints[i] = 0
+        2: thePoints[i] = thePoints[i] + CAColors.count - 1
+        3: thePoints[i] = oldPoints[i]
+        4: thePoints[i] = CAColors.count - 1
+        5: thePoints[i] = abs(thePoints[i])
+      end case
+    end if
+  end repeat
+  
+end newCALine
+
+on getOldPoint me, myIndex
+  -- this function is used by newCALine, it returns the oldPoint[index], 
+  -- unless index is out of bounds: index > the number of colors or index < 1
+  -- the value returned then is determined by the uncommented lines below
+  if myIndex < 1 then
+    -- return 0               -- transparent
+    -- return oldPoints[1]    -- opaque
+    return oldPoints[2]       -- reflective
+  else if myIndex > oldPoints.count then
+    -- return 0                             -- transparent
+    -- return oldPoints[oldPoints.count]    -- opaque
+    return oldPoints[oldPoints.count - 1]   -- reflective
+  else
+    return oldPoints[myIndex]
+  end if
+end getOldPoint
+
+on drawCALine me
+  -- this handler draws a line to the offscreen bitmap
+  CABackColor = CAColors[thePoints[1] + 1]
+  -- draw a line in the backgroundcolor, so we can skip those pixels later on
+  myOffScreen.draw(0, lineNumber, theWidth ,lineNumber, CABackColor)
+  
+  -- write the current line buffer (thePoints) to the offscreen bitmap
+  repeat with counter = 1 to thePoints.count 
+    -- draw the pixel only if it's not in the background color
+    if thePoints[counter] > 0 then
+      theColor = CAColors[thePoints[counter] + 1]
+      myOffScreen.setPixel(counter - 1,lineNumber, paletteIndex(theColor))
+    end if
+  end repeat
+  
+  -- check for image full 
+  if lineNumber < myOffScreen.height - 1 then
+    lineNumber = lineNumber + 1
+  else
+    -- image full
+    -- if scrolling is on then scroll the current image up the current chunk size in pixels
+    if scrolling then
+      -- blit full image to screen
+      destImg.copyPixels(myOffScreen, theRect, theRect)
+      -- shift offscreen image up
+      myOffScreen.copyPixels(myOffScreen, rect(0, 0 ,theWidth, theHeight - updateInterval), rect(0,updateInterval, theWidth, theHeight))
+      -- set the next line to draw 
+      lineNumber = lineNumber - updateInterval + 1
+      -- set myUpdate = 0, so no update comes before the screen is full again
+      myUpdate = 0
+    else
+      lineNumber = 0
+    end if
+  end if
+  
+  -- duplicate the first line buffer (thePoints) to second line buffer (oldPoints)
+  oldPoints = duplicate(thePoints)
+  
+  -- blit the offscreen bitmap to stage if specified chunk size has been rendered
+  -- further optimisation is possible here
+  if updateInterval <= myUpdate then
+    destImg.copyPixels(myOffScreen, theRect, theRect)
+    myUpdate = 0
+  end if
+  myUpdate = myUpdate + 1
+end drawCALine
+
+on initColors me
+  -- map the entire palette to the user selected number of colors
+  CAColors = list(CABackColor)
+  repeat with i = 2 to numColors
+    CAColors[i] = i * 254 / numColors
+  end repeat
+end initColors
