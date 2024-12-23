@@ -8,234 +8,267 @@ export interface ICantOptions {
     edgeBehavior: 'transparent' | 'opaque' | 'reflect';
     initPoints: 'random' | 'regular';
     initNumber: number;
+    scrolling: boolean;
 }
 
-export const drawCanticle = (canvas: HTMLCanvasElement, options: ICantOptions) => {
-    const destImg = canvas.getContext('2d');
-    const theWidth = canvas.width;
-    const numberOfPts = options.initNumber;
-    const theHeight = canvas.height;
-    let thePoints: number[] = [];
+export const Formula = new Map<string, number>([
+    ['zeer faksinerend!!', 1],
+    ['nog dichter bij amiga programma!', 2],
+    ['ook wel aardig', 3],
+    ['wel aardig', 4],
+    ['heel mooi', 5],
+    ['formule 6', 6],
+    ['formule 7', 7],
+    ['kerstboom met kaarsjes', 8],
+    ['wel aardig 3', 9],
+]);
 
-    // initialise display colors
-    const CAColors = initColors('#000', 32);
+export class Canticle {
+    private destImg!: CanvasRenderingContext2D;
+    private osCanvas!: OffscreenCanvas;
+    private osBitmap!: OffscreenCanvasRenderingContext2D;
+    private theWidth!: number;
+    private numberOfPts!: number;
+    private theHeight!: number;
+    private thePoints!: number[];
+    private oldPoints!: number[];
+    private CAColors!: string[];
+    private options!: ICantOptions;
+    private line = 0;
+    private myUpdate = 0;
 
-    // initialise line buffer
-    for (let i = 0; i < theWidth; i++) {
-        thePoints[i] = 0;
+    constructor(canvas: HTMLCanvasElement, ca_options: ICantOptions) {
+        const dest = canvas.getContext('2d');
+        if (dest) {
+            // some other props, to be exposed in dialog later
+            this.theWidth = canvas.width;
+            this.theHeight = canvas.height;
+            const osbm = new OffscreenCanvas(this.theWidth, this.theHeight);
+            const osCtx = osbm.getContext('2d');
+            if (osbm && osCtx) {
+                this.osCanvas = osbm;
+                this.osBitmap = osCtx;
+                this.destImg = dest;
+                this.options = ca_options;
+                this.numberOfPts = this.options.initNumber;
+                this.thePoints = [];
+                // initialise display colors
+                this.CAColors = this.initColors('#000', 32);
+            }
+        }
     }
 
-    // set up initial points
-    const randomDist = options.initPoints === 'random';
-    for (let i = 0; i < numberOfPts; i++) {
-        const hoei = Math.round(randomDist ? Math.random() * (theWidth + 2) : (i * theWidth) / (numberOfPts + 1));
-        thePoints[hoei] = CAColors.length - 1;
-    }
+    drawCanticle = () => {
+        // initialise line buffer
+        for (let i = 0; i < this.theWidth; i++) {
+            this.thePoints[i] = 0;
+        }
 
-    let myUpdate = 1;
+        // set up initial points
+        const randomDist = this.options.initPoints === 'random';
+        for (let i = 0; i < this.numberOfPts; i++) {
+            const hoei = Math.round(randomDist ? Math.random() * (this.theWidth + 2) : (i * this.theWidth) / (this.numberOfPts + 1));
+            this.thePoints[hoei] = this.CAColors.length - 1;
+        }
 
-    // some other props, to be exposed in dialog later
-    const osbm = new OffscreenCanvas(theWidth, theHeight);
-    const myOffScreen = osbm.getContext('2d');
-    if (myOffScreen && destImg) {
+        this.myUpdate = 1;
+
         // blank the offscreen bitmap with CAColors[1] (the background color)
-        myOffScreen.fillRect(0, 0, theWidth, theHeight);
+        this.osBitmap.fillRect(0, 0, this.theWidth, this.theHeight);
         // copy this to the destination image as well
-        destImg.drawImage(osbm, 0, 0);
-        let oldPoints = thePoints.slice(0);
-        for (let i = 0; i < theHeight; i++) {
-            thePoints = newCALine(oldPoints, options.formule, CAColors.length, options);
-            drawCALine(i, thePoints, CAColors, myOffScreen);
-            oldPoints = thePoints.slice(0);
+        this.destImg.drawImage(this.osCanvas, 0, 0);
+        this.oldPoints = this.thePoints.slice(0);
+        this.line = 0;
+        requestAnimationFrame(this.drawStep);
+    };
 
-            // check for image full
-            // if (lineNumber < myOffScreen.height - 1) {
-            //     lineNumber = lineNumber + 1
-            // } else {
-            //     // image full
-            //     // if scrolling is on then scroll the current image up the current chunk size in pixels
-            //     if (scrolling) {
-            //         // blit full image to screen
-            //         destImg.copyPixels(myOffScreen, theRect, theRect)
-            //         // shift offscreen image up
-            //         myOffScreen.copyPixels(
-            //             myOffScreen,
-            //             rect(0, 0, theWidth, theHeight - updateInterval),
-            //             rect(0, updateInterval, theWidth, theHeight),
-            //         )
-            //         // set the next line to draw
-            //         lineNumber = lineNumber - updateInterval + 1
-            //         // set myUpdate = 0, so no update comes before the screen is full again
-            //         myUpdate = 0
-            //     } else {
-            //         lineNumber = 0
-            //     }
-            // }
-
-            // blit the offscreen bitmap to stage if specified chunk size has been rendered
-            // further optimisation is possible here
-            if (options.updateInterval <= myUpdate) {
-                destImg.drawImage(osbm, 0, 0);
-                myUpdate = 0;
+    drawStep = () => {
+        this.thePoints = this.newCALine(this.options.formule, this.CAColors.length, this.options.edgeBehavior);
+        this.drawCALine();
+        this.oldPoints = this.thePoints.slice(0);
+        // blit the offscreen bitmap to stage if specified chunk size has been rendered
+        // further optimisation is possible here
+        if (this.options.updateInterval <= this.myUpdate) {
+            this.destImg?.drawImage(this.osCanvas, 0, 0);
+            this.myUpdate = 0;
+        }
+        this.myUpdate++;
+        // check for image full
+        if (this.line < this.theHeight - 1) {
+            this.line++;
+        } else {
+            // image full
+            // if scrolling is on then scroll the current image up the current chunk size in pixels
+            if (this.options.scrolling) {
+                // blit full image to screen
+                this.destImg.drawImage(this.osCanvas, 0, 0);
+                // shift offscreen image up
+                this.osBitmap.drawImage(
+                    this.osCanvas,
+                    0,
+                    this.options.updateInterval,
+                    this.theWidth,
+                    this.theHeight - this.options.updateInterval,
+                    0,
+                    0,
+                    this.theWidth,
+                    this.theHeight - this.options.updateInterval,
+                );
+                // set the next line to draw
+                this.line = this.line - this.options.updateInterval + 1;
+                // set myUpdate = 0, so no update comes before the screen is full again
+                this.myUpdate = 0;
+            } else {
+                this.line = 0;
             }
-            myUpdate++;
         }
-    }
-};
+        requestAnimationFrame(this.drawStep);
+    };
 
-const newCALine = (points: number[], formule: number, numColors: number, options: ICantOptions): number[] => {
-    //   this calculates a new line from the values in points
-    //   the new values are returned, will be drawn by drawCALine
-    return points.map((element, i, arr) => {
-        let newEl = 0;
-        //  use the selected formula
-        switch (formule) {
-            case 1:
-                // /* zeer faksinerend!!*/
-                newEl =
-                    element -
-                    1 +
-                    2 * Math.abs(getOldPoint(i - 1, arr, options.edgeBehavior) - getOldPoint(i + 1, arr, options.edgeBehavior));
-                break;
-            case 2:
-                // /* nog dichter bij amiga programma! */
-                newEl =
-                    Math.abs(element - 1) *
-                    (1 + 2 * Math.abs(getOldPoint(i - 1, arr, options.edgeBehavior) - getOldPoint(i + 1, arr, options.edgeBehavior)));
-                break;
-            case 3:
-                // /* ook wel aardig */
-                newEl =
-                    Math.abs(element - getOldPoint(i - 1, arr, options.edgeBehavior) - 1) *
-                    Math.abs(element - getOldPoint(i + 1, arr, options.edgeBehavior) - 1);
-                break;
-            case 4:
-                // /* wel aardig */
-                newEl = element - 1 + getOldPoint(i - 1, arr, options.edgeBehavior) + getOldPoint(i + 1, arr, options.edgeBehavior);
-                break;
-            case 5:
-                // /* heel mooi */
-                newEl =
-                    Math.abs(element - 1) +
-                    2 * (getOldPoint(i - 1, arr, options.edgeBehavior) * getOldPoint(i + 1, arr, options.edgeBehavior));
-                break;
-            case 6:
-                newEl =
-                    Math.abs(element - 1) +
-                    3 * (getOldPoint(i - 1, arr, options.edgeBehavior) + getOldPoint(i + 1, arr, options.edgeBehavior));
-                break;
-            case 7:
-                newEl =
-                    Math.abs(element - 1) +
-                    2 * (getOldPoint(i - 1, arr, options.edgeBehavior) + getOldPoint(i + 1, arr, options.edgeBehavior));
-                break;
-            case 8:
-                // /* kerstboom met kaarsjes */
-                newEl = 1 - element + 2 * (getOldPoint(i - 1, arr, options.edgeBehavior) + getOldPoint(i + 1, arr, options.edgeBehavior));
-                break;
-            case 9:
-                // /* wel aardig */
-                newEl = (element + getOldPoint(i - 1, arr, options.edgeBehavior) + getOldPoint(i + 1, arr, options.edgeBehavior)) / 3;
-                break;
-        }
-
-        // bounds checking and appropriate action on over- or underflow
-        if (newEl > numColors - 1) {
-            switch (options.maxOverflow) {
+    newCALine = (formule: number, numColors: number, edge: 'transparent' | 'opaque' | 'reflect'): number[] => {
+        //   this calculates a new line from the values in points
+        //   the new values are returned, will be drawn by drawCALine
+        return this.thePoints.map((pt, i) => {
+            let newPt = 0;
+            //  use the selected formula
+            switch (formule) {
                 case 1:
-                    newEl = 0;
+                    // /* zeer faksinerend!!*/
+                    newPt = pt - 1 + 2 * Math.abs(this.getOldPoint(i - 1, edge) - this.getOldPoint(i + 1, edge));
                     break;
                 case 2:
-                    newEl -= numColors;
+                    // /* nog dichter bij amiga programma! */
+                    newPt = Math.abs(pt - 1) * (1 + 2 * Math.abs(this.getOldPoint(i - 1, edge) - this.getOldPoint(i + 1, edge)));
                     break;
                 case 3:
-                    newEl = element;
+                    // /* ook wel aardig */
+                    newPt = Math.abs(pt - this.getOldPoint(i - 1, edge) - 1) * Math.abs(pt - this.getOldPoint(i + 1, edge) - 1);
                     break;
                 case 4:
-                    newEl = numColors - 1;
+                    // /* wel aardig */
+                    newPt = pt - 1 + this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge);
                     break;
                 case 5:
-                    newEl = numColors - (newEl - numColors);
+                    // /* heel mooi */
+                    newPt = Math.abs(pt - 1) + 2 * (this.getOldPoint(i - 1, edge) * this.getOldPoint(i + 1, edge));
+                    break;
+                case 6:
+                    //
+                    newPt = Math.abs(pt - 1) + 3 * (this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge));
+                    break;
+                case 7:
+                    newPt = Math.abs(pt - 1) + 2 * (this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge));
+                    break;
+                case 8:
+                    // /* kerstboom met kaarsjes */
+                    newPt = 1 - pt + 2 * (this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge));
+                    break;
+                case 9:
+                    // /* wel aardig */
+                    newPt = (pt + this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge)) / 3;
                     break;
             }
-        } else if (newEl < 0) {
-            switch (options.minOverflow) {
-                case 1:
-                    newEl = 0;
-                    break;
-                case 2:
-                    newEl += numColors;
-                    break;
-                case 3:
-                    newEl = element;
-                    break;
-                case 4:
-                    newEl = numColors - 1;
-                    break;
-                case 5:
-                    newEl = Math.abs(newEl);
-                    break;
+
+            // bounds checking and appropriate action on over- or underflow
+            if (newPt > numColors - 1) {
+                switch (this.options.maxOverflow) {
+                    case 1:
+                        newPt = 0;
+                        break;
+                    case 2:
+                        newPt -= numColors;
+                        break;
+                    case 3:
+                        newPt = pt;
+                        break;
+                    case 4:
+                        newPt = numColors - 1;
+                        break;
+                    case 5:
+                        newPt = numColors - (newPt - numColors);
+                        break;
+                }
+            } else if (newPt < 0) {
+                switch (this.options.minOverflow) {
+                    case 1:
+                        newPt = 0;
+                        break;
+                    case 2:
+                        newPt += numColors;
+                        break;
+                    case 3:
+                        newPt = pt;
+                        break;
+                    case 4:
+                        newPt = numColors - 1;
+                        break;
+                    case 5:
+                        newPt = Math.abs(newPt);
+                        break;
+                }
+            }
+            return newPt;
+        });
+    };
+
+    getOldPoint = (index: number, edge: 'transparent' | 'opaque' | 'reflect' = 'reflect') => {
+        // this function is used by newCALine, it returns the oldPoint[index],
+        // unless index is out of bounds: index > the number of colors or index < 1
+        // the value returned then is determined by the uncommented lines below
+        if (index < 0) {
+            switch (edge) {
+                case 'transparent':
+                    return 0;
+                case 'opaque':
+                    return this.thePoints[0];
+                case 'reflect':
+                    return this.thePoints[1];
+            }
+        } else if (index > this.thePoints.length - 1) {
+            switch (edge) {
+                case 'transparent':
+                    return 0;
+                case 'opaque':
+                    return this.thePoints[this.theWidth - 1];
+                case 'reflect':
+                    return this.thePoints[this.theWidth - 2]; // reflective
             }
         }
-        return newEl;
-    });
-};
+        return this.thePoints[index];
+    };
 
-const getOldPoint = (index: number, points: number[], edge: 'transparent' | 'opaque' | 'reflect' = 'reflect') => {
-    // this function is used by newCALine, it returns the oldPoint[index],
-    // unless index is out of bounds: index > the number of colors or index < 1
-    // the value returned then is determined by the uncommented lines below
-    if (index < 0) {
-        switch (edge) {
-            case 'transparent':
-                return 0;
-            case 'opaque':
-                return points[0];
-            case 'reflect':
-                return points[1];
+    /**
+     * draw a line to the offscreen bitmap
+     * @param lineNumber The line to draw
+     */
+    drawCALine = () => {
+        //
+        // draw a line in the backgroundcolor, so we can skip those pixels later on
+        this.osBitmap.fillStyle = this.CAColors[0];
+        this.osBitmap.fillRect(0, this.line, this.theWidth, 1);
+
+        // write the current line buffer (thePoints) to the offscreen bitmap
+        this.thePoints.forEach((p, i) => {
+            // draw the pixel only if it's not in the background color
+            if (p > 0) {
+                const theColor = this.CAColors[p];
+                this.osBitmap.fillStyle = theColor;
+                this.osBitmap.fillRect(i, this.line, 1, 1);
+            }
+        });
+    };
+
+    initColors = (CABackColor: string, num: number): string[] => {
+        // create 256 color palette
+        const colors: string[] = [];
+        for (let i = 0; i < 255; i++) {
+            colors.push(`rgb(${Math.round(i / 2)}, ${i}, ${256 - i})`);
         }
-    } else if (index > points.length - 1) {
-        switch (edge) {
-            case 'transparent':
-                return 0;
-            case 'opaque':
-                return points[points.length - 1];
-            case 'reflect':
-                return points[points.length - 2]; // reflective
+        // map the entire palette to the user selected number of colors
+        const CAColors = [CABackColor];
+        for (let i = 1; i < num; i++) {
+            CAColors.push(colors[Math.round((i * 255) / num)]);
         }
-    }
-    return points[index];
-};
-
-const drawCALine = (lineNumber: number, thePoints: number[], CAColors: string[], myOffScreen: OffscreenCanvasRenderingContext2D) => {
-    // draw a line to the offscreen bitmap
-    const theWidth = thePoints.length;
-    // draw a line in the backgroundcolor, so we can skip those pixels later on
-    myOffScreen.moveTo(0, lineNumber);
-    myOffScreen.fillStyle = CAColors[0];
-    myOffScreen.lineTo(theWidth, lineNumber); //, CABackColor)
-
-    // write the current line buffer (thePoints) to the offscreen bitmap
-    thePoints.forEach((p, i) => {
-        // draw the pixel only if it's not in the background color
-        if (p > 0) {
-            const theColor = CAColors[p];
-            myOffScreen.fillStyle = theColor;
-            myOffScreen.fillRect(i, lineNumber, 1, 1);
-        }
-    });
-};
-
-const initColors = (CABackColor: string, numColors: number): string[] => {
-    // create 256 color palette
-    const colors: string[] = [];
-    for (let i = 0; i < 255; i++) {
-        colors.push(`rgb(${256 - i}, ${i}, ${Math.round(i / 2)})`);
-    }
-    // map the entire palette to the user selected number of colors
-    const CAColors = [CABackColor];
-    for (let i = 1; i < numColors; i++) {
-        CAColors.push(colors[Math.round((i * 255) / numColors)]);
-    }
-    return CAColors;
-};
+        return CAColors;
+    };
+}
