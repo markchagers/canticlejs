@@ -2,6 +2,7 @@
 
 export interface ICantOptions {
     formule: number;
+    steps: number;
     updateInterval: number;
     maxOverflow: number;
     minOverflow: number;
@@ -11,28 +12,15 @@ export interface ICantOptions {
     scrolling: boolean;
 }
 
-export const Formula = new Map<string, number>([
-    ['zeer faksinerend!!', 1],
-    ['nog dichter bij amiga programma!', 2],
-    ['ook wel aardig', 3],
-    ['wel aardig', 4],
-    ['heel mooi', 5],
-    ['formule 6', 6],
-    ['formule 7', 7],
-    ['kerstboom met kaarsjes', 8],
-    ['wel aardig 3', 9],
-]);
-
 export class Canticle {
-    private destImg!: CanvasRenderingContext2D;
+    private destBitmap!: CanvasRenderingContext2D;
     private osCanvas!: OffscreenCanvas;
     private osBitmap!: OffscreenCanvasRenderingContext2D;
-    private theWidth!: number;
-    private numberOfPts!: number;
-    private theHeight!: number;
-    private thePoints!: number[];
-    private oldPoints!: number[];
-    private CAColors!: string[];
+    private width!: number;
+    private pointsCount!: number;
+    private height!: number;
+    private points!: number[];
+    private colors!: string[];
     private options!: ICantOptions;
     private line = 0;
     private myUpdate = 0;
@@ -40,79 +28,76 @@ export class Canticle {
     constructor(canvas: HTMLCanvasElement, ca_options: ICantOptions) {
         const dest = canvas.getContext('2d');
         if (dest) {
-            // some other props, to be exposed in dialog later
-            this.theWidth = canvas.width;
-            this.theHeight = canvas.height;
-            const osbm = new OffscreenCanvas(this.theWidth, this.theHeight);
+            this.width = canvas.width;
+            this.height = canvas.height;
+            const osbm = new OffscreenCanvas(this.width, this.height);
             const osCtx = osbm.getContext('2d');
             if (osbm && osCtx) {
                 this.osCanvas = osbm;
                 this.osBitmap = osCtx;
-                this.destImg = dest;
+                this.destBitmap = dest;
                 this.options = ca_options;
-                this.numberOfPts = this.options.initNumber;
-                this.thePoints = [];
+                this.pointsCount = this.options.initNumber;
+                this.points = [];
                 // initialise display colors
-                this.CAColors = this.initColors('#000', 32);
+                this.colors = this.initColors('#000', this.options.steps);
             }
         }
     }
 
     drawCanticle = () => {
         // initialise line buffer
-        for (let i = 0; i < this.theWidth; i++) {
-            this.thePoints[i] = 0;
+        for (let i = 0; i < this.width; i++) {
+            this.points[i] = 0;
         }
 
         // set up initial points
         const randomDist = this.options.initPoints === 'random';
-        for (let i = 0; i < this.numberOfPts; i++) {
-            const hoei = Math.round(randomDist ? Math.random() * (this.theWidth + 2) : (i * this.theWidth) / (this.numberOfPts + 1));
-            this.thePoints[hoei] = this.CAColors.length - 1;
+        for (let i = 0; i < this.pointsCount; i++) {
+            const hoei = Math.round(randomDist ? Math.random() * (this.width + 2) : (i * this.width) / (this.pointsCount + 1));
+            this.points[hoei] = this.colors.length - 1;
         }
 
         this.myUpdate = 1;
 
-        // blank the offscreen bitmap with CAColors[1] (the background color)
-        this.osBitmap.fillRect(0, 0, this.theWidth, this.theHeight);
+        // blank the offscreen bitmap with CAColors[0] (the background color)
+        this.osBitmap.fillRect(0, 0, this.width, this.height);
         // copy this to the destination image as well
-        this.destImg.drawImage(this.osCanvas, 0, 0);
-        this.oldPoints = this.thePoints.slice(0);
+        this.destBitmap.drawImage(this.osCanvas, 0, 0);
         this.line = 0;
         requestAnimationFrame(this.drawStep);
     };
 
     drawStep = () => {
-        this.thePoints = this.newCALine(this.options.formule, this.CAColors.length, this.options.edgeBehavior);
+        this.points = this.newCALine(this.options.formule, this.colors.length, this.options.edgeBehavior);
         this.drawCALine();
-        this.oldPoints = this.thePoints.slice(0);
         // blit the offscreen bitmap to stage if specified chunk size has been rendered
         // further optimisation is possible here
         if (this.options.updateInterval <= this.myUpdate) {
-            this.destImg?.drawImage(this.osCanvas, 0, 0);
+            this.destBitmap?.drawImage(this.osCanvas, 0, 0);
             this.myUpdate = 0;
         }
         this.myUpdate++;
         // check for image full
-        if (this.line < this.theHeight - 1) {
+        if (this.line < this.height - 1) {
             this.line++;
         } else {
             // image full
             // if scrolling is on then scroll the current image up the current chunk size in pixels
             if (this.options.scrolling) {
                 // blit full image to screen
-                this.destImg.drawImage(this.osCanvas, 0, 0);
+                this.destBitmap.drawImage(this.osCanvas, 0, 0);
                 // shift offscreen image up
                 this.osBitmap.drawImage(
                     this.osCanvas,
                     0,
                     this.options.updateInterval,
-                    this.theWidth,
-                    this.theHeight - this.options.updateInterval,
+                    this.width,
+                    this.height - this.options.updateInterval,
                     0,
                     0,
-                    this.theWidth,
-                    this.theHeight - this.options.updateInterval,
+                    this.width,
+                    this.height - this.options.updateInterval,
                 );
                 // set the next line to draw
                 this.line = this.line - this.options.updateInterval + 1;
@@ -128,7 +113,7 @@ export class Canticle {
     newCALine = (formule: number, numColors: number, edge: 'transparent' | 'opaque' | 'reflect'): number[] => {
         //   this calculates a new line from the values in points
         //   the new values are returned, will be drawn by drawCALine
-        return this.thePoints.map((pt, i) => {
+        return this.points.map((pt, i) => {
             let newPt = 0;
             //  use the selected formula
             switch (formule) {
@@ -220,21 +205,21 @@ export class Canticle {
                 case 'transparent':
                     return 0;
                 case 'opaque':
-                    return this.thePoints[0];
+                    return this.points[0];
                 case 'reflect':
-                    return this.thePoints[1];
+                    return this.points[1];
             }
-        } else if (index > this.thePoints.length - 1) {
+        } else if (index > this.points.length - 1) {
             switch (edge) {
                 case 'transparent':
                     return 0;
                 case 'opaque':
-                    return this.thePoints[this.theWidth - 1];
+                    return this.points[this.width - 1];
                 case 'reflect':
-                    return this.thePoints[this.theWidth - 2]; // reflective
+                    return this.points[this.width - 2]; // reflective
             }
         }
-        return this.thePoints[index];
+        return this.points[index];
     };
 
     /**
@@ -244,14 +229,14 @@ export class Canticle {
     drawCALine = () => {
         //
         // draw a line in the backgroundcolor, so we can skip those pixels later on
-        this.osBitmap.fillStyle = this.CAColors[0];
-        this.osBitmap.fillRect(0, this.line, this.theWidth, 1);
+        this.osBitmap.fillStyle = this.colors[0];
+        this.osBitmap.fillRect(0, this.line, this.width, 1);
 
         // write the current line buffer (thePoints) to the offscreen bitmap
-        this.thePoints.forEach((p, i) => {
+        this.points.forEach((p, i) => {
             // draw the pixel only if it's not in the background color
             if (p > 0) {
-                const theColor = this.CAColors[p];
+                const theColor = this.colors[p];
                 this.osBitmap.fillStyle = theColor;
                 this.osBitmap.fillRect(i, this.line, 1, 1);
             }

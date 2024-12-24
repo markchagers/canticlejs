@@ -1,20 +1,34 @@
 <script setup lang="ts">
-    import { onMounted, ref } from 'vue';
-    import { Canticle, Formula } from '../process/canticle';
+    import { ref } from 'vue';
+    import { Canticle } from '../process/canticle';
 
-    const formulaOptions: { label: string, value: number }[] = [];
-    onMounted(() => {
-        Formula.forEach((value, label) => {
-            formulaOptions.push({ label, value });
-        });
-    });
+    type TOption = {
+        label: string;
+        formula: number
+    }
 
-    const selectedFormula = ref({ label: 'zeer faksinerend!!', value: 1 })
+    const selectedFormula = ref<TOption>({ label: 'zeer fascinerend!!', formula: 1 });
+
+    const formulaOptions: TOption[] = [
+        { label: 'zeer fascinerend!!', formula: 1 },
+        { label: 'nog dichter bij amiga programma!', formula: 2 },
+        { label: 'ook wel aardig', formula: 3 },
+        { label: 'wel aardig', formula: 4 },
+        { label: 'heel mooi', formula: 5 },
+        { label: 'formule 6', formula: 6 },
+        { label: 'formule 7', formula: 7 },
+        { label: 'kerstboom met kaarsjes', formula: 8 },
+        { label: 'wel aardig 3', formula: 9 },
+    ];
+
+
     const cantvas = ref<HTMLCanvasElement>();
     const start = () => {
-        if (cantvas.value) {
+        const selected = selectedFormula.value
+        if (cantvas.value && selected) {
             const canticle = new Canticle(cantvas.value, {
-                formule: selectedFormula.value.value,
+                formule: selected.formula,
+                steps: 30,
                 updateInterval: 1,
                 maxOverflow: 1,
                 minOverflow: 1,
@@ -33,8 +47,8 @@
         <h1>Canticle JS</h1>
         <div class="control">
             <span>Formule</span>
-            <select name="formule" @select="start()">
-                <option v-for="opt in formulaOptions" :key="opt.label" value="opt.value">{{
+            <select name="formule" v-model="selectedFormula">
+                <option v-for="opt in formulaOptions" :key="opt.formula" :value="opt">{{
                     opt.label }}</option>
             </select>
             <button @click="start()">Start</button>
