@@ -10,6 +10,7 @@ export interface ICantOptions {
     initPoints: 'random' | 'regular';
     initNumber: number;
     scrolling: boolean;
+    paletteImage?: OffscreenCanvasRenderingContext2D;
 }
 
 export class Canticle {
@@ -45,6 +46,10 @@ export class Canticle {
         }
     }
 
+    getColors = (): string[] => {
+        return this.colors;
+    };
+
     drawCanticle = () => {
         // initialise line buffer
         for (let i = 0; i < this.width; i++) {
@@ -54,7 +59,7 @@ export class Canticle {
         // set up initial points
         const randomDist = this.options.initPoints === 'random';
         for (let i = 0; i < this.pointsCount; i++) {
-            const hoei = Math.round(randomDist ? Math.random() * (this.width + 2) : (i * this.width) / (this.pointsCount + 1));
+            const hoei = Math.round(randomDist ? Math.random() * (this.width + 2) : ((i + 1) * this.width) / (this.pointsCount + 1));
             this.points[hoei] = this.colors.length - 1;
         }
 
@@ -244,10 +249,21 @@ export class Canticle {
     };
 
     initColors = (CABackColor: string, num: number): string[] => {
-        // create 256 color palette
         const colors: string[] = [];
-        for (let i = 0; i < 255; i++) {
-            colors.push(`rgb(${Math.round(i / 2)}, ${i}, ${256 - i})`);
+        if (this.options.paletteImage) {
+            const ctx = this.options.paletteImage;
+            // create 256 color palette
+            for (let i = 0; i < 255; i++) {
+                const pixel = ctx.getImageData(i, 0, 1, 1);
+                const data = pixel.data;
+                const rgbColor = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
+                colors.push(rgbColor);
+            }
+        } else {
+            // create 256 color palette
+            for (let i = 0; i < 255; i++) {
+                colors.push(`rgb(${i}, ${Math.round(i * 0.8)}, ${Math.round(i * 0.4)})`);
+            }
         }
         // map the entire palette to the user selected number of colors
         const CAColors = [CABackColor];
