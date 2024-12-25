@@ -249,9 +249,9 @@ export class Canticle {
                 case 'transparent':
                     return 0;
                 case 'opaque':
-                    return this.points[this.width - 1];
+                    return this.points[this.width];
                 case 'reflect':
-                    return this.points[this.width - 2]; // reflective
+                    return this.points[this.width - 1]; // reflective
             }
         }
         return this.points[index];

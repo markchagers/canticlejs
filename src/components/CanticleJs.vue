@@ -150,10 +150,10 @@
             </div>
         </div>
         <div class="canticle">
+            <canvas width="1000" height="800" ref="cantvas"></canvas>
             <div class="colors">
                 <div v-for="chip in colorChips" :key="chip" :style="`background-color: ${chip};`"></div>
             </div>
-            <canvas width="1000" height="800" ref="cantvas"></canvas>
         </div>
     </div>
 </template>
