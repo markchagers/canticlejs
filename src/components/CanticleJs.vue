@@ -26,23 +26,44 @@
     const startCount = ref(3);
     const startRandom = ref(true);
     const palette = ref<'one' | 'two' | 'three'>('one');
+    const bgColor = ref('#000');
+    const stop10 = ref(true);
+    const buttonText = ref('Pauzeer');
+    const started = ref(false);
+    const imageMap = new Map<string, number>([
+        ['one', 1], ['two', 2], ['three', 3]
+    ]);
+
+    const pauseResume = () => {
+        buttonText.value = canticle?.pauseResume() ? 'Ga door' : 'Pauzeer'
+    }
+
+    const cleanUp = () => {
+        canticle?.cleanUp();
+        canticle = null;
+        colorChips.value = [];
+    }
+
+    const iterations = ref<number>();
+
+    let canticle: Canticle | null;
 
     const cantvas = ref<HTMLCanvasElement>();
     const start = () => {
-        const imageMap = new Map<string, number>([
-            ['one', 1], ['two', 2], ['three', 3]
-        ])
+        cleanUp();
         const selected = selectedFormula.value
         if (cantvas.value && selected) {
             const cantOpts: ICantOptions = {
+                background: bgColor.value,
                 formule: selected.formula,
                 steps: stepCount.value,
                 updateInterval: 1,
                 maxOverflow: 1,
                 minOverflow: 1,
-                edgeBehavior: 'reflect',
+                edgeBehavior: 'transparent',
                 initPoints: startRandom.value ? 'random' : 'regular',
                 initNumber: startCount.value,
+                stopOn10: stop10.value,
                 scrolling: true,
             }
             const cv = new OffscreenCanvas(256, 2);
@@ -54,62 +75,108 @@
                 bitmap.drawImage(image, 0, 0);
                 cantOpts.paletteImage = bitmap
             }
-            const canticle = new Canticle(cantvas.value, cantOpts);
+
+            canticle = new Canticle(cantvas.value, cantOpts);
+            canticle.getIterations((iter: number) => iterations.value = iter);
             canticle.drawCanticle();
             colorChips.value = canticle.getColors();
+            started.value = true;
+            buttonText.value = 'Pauzeer';
         }
     }
 </script>
 
 <template>
     <div class="main">
-        <h1>Canticle JS</h1>
-        <div class="control">
-            <span>Formule:</span>
-            <select name="formule" v-model="selectedFormula">
-                <option v-for="opt in formulaOptions" :key="opt.formula" :value="opt">{{
-                    opt.label }}</option>
-            </select>
-            <span> Stappen:</span>
-            <input type="number" v-model="stepCount">
-            <span> Startpunten:</span>
-            <input type="number" v-model="startCount">
-            <label for="checkrandom">Random</label>
-            <input id="checkrandom" type="checkbox" v-model="startRandom">
-            <button @click="start()">Start</button>
+        <div class="sidebar">
+            <h1>Canticle JS</h1>
+            <div class="control">
+                <label for="formule" title="De formule waarmee gerekend wordt">
+                    Formule:
+                    <select name="formule" id="formule" v-model="selectedFormula">
+                        <option v-for="opt in formulaOptions" :key="opt.formula" :value="opt">{{
+                            opt.label }}</option>
+                    </select>
+                </label>
+                <label for="stepcount" title="Aantal stappen (kleuren) van de berekening">
+                    Stappen:
+                    <input type="number" v-model="stepCount" id="stepcount">
+                </label>
+                <label for="startcount" title="Het aantal startpunten">
+                    Startpunten:
+                    <input type="number" v-model="startCount" id="startcount">
+                </label>
+                <label for="checkrandom" title="Willekeurige verdeling van de startpunten">
+                    <input id="checkrandom" type="checkbox" v-model="startRandom">
+                    Random
+                </label>
+                <label for="checkstop" title="Stop als het oninteressant wordt">
+                    <input id="checkstop" type="checkbox" v-model="stop10">
+                    Stop 1-0
+                </label>
+                <button v-if="started" @click="pauseResume()">{{ buttonText }}</button>
+                <button @click="start()">Start</button>
+                <span>Iteraties: {{ iterations }}</span>
+            </div>
+            <div class="palettes" title="Kies het kleurenpalet en de achtergrondkleur">
+                <span> Kleuren:</span>
+                <label for="one">
+                    <input type="radio" name="gradient" v-model="palette" value="one" id="one">
+                    <div class="gradient one"></div>
+                </label>
+                <label for="two">
+                    <input type="radio" name="gradient" v-model="palette" value="two" id="two">
+                    <div class="gradient two"></div>
+                </label>
+                <label for="three">
+                    <input type="radio" name="gradient" v-model="palette" value="three" id="three">
+                    <div class="gradient three"></div>
+                </label>
+                <label>
+                    Achtergrondkleur:
+                    <label for="zwart">
+                        <input type="radio" name="background" v-model="bgColor" value="#000" id="zwart">
+                        Zwart
+                    </label>
+                    <label for="wit">
+                        <input type="radio" name="background" v-model="bgColor" value="#fff" id="wit">
+                        Wit
+                    </label>
+                    <label for="grijs">
+                        <input type="radio" name="background" v-model="bgColor" value="#ccc" id="grijs">
+                        Grijs
+                    </label>
+                </label>
+            </div>
         </div>
-        <div class="palettes">
-            <input type="radio" name="gradient" v-model="palette" value="one" id="one">
-            <label for="one">
-                <div class="gradient one"></div>
-            </label>
-            <input type="radio" name="gradient" v-model="palette" value="two" id="two">
-            <label for="two">
-                <div class="gradient two"></div>
-            </label>
-            <input type="radio" name="gradient" v-model="palette" value="three" id="three">
-            <label for="three">
-                <div class="gradient three"></div>
-            </label>
+        <div class="canticle">
+            <div class="colors">
+                <div v-for="chip in colorChips" :key="chip" :style="`background-color: ${chip};`"></div>
+            </div>
+            <canvas width="1000" height="800" ref="cantvas"></canvas>
         </div>
-        <div class="colors">
-            <div v-for="chip in colorChips" :key="chip" :style="`background-color: ${chip};`"></div>
-        </div>
-        <canvas width="1000" height="800" ref="cantvas"></canvas>
     </div>
 </template>
 
 <style lang="css">
     .main {
+        width: 100vw;
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: stretch;
+    }
+
+    .sidebar {
+        flex: 240px;
         display: flex;
         flex-flow: column nowrap;
-        gap: 16px;
+        align-items: center;
     }
 
     .control {
         display: flex;
-        flex-flow: row nowrap;
-        gap: 8px;
+        flex-flow: column nowrap;
+        gap: 16px;
     }
 
     .colors {
@@ -121,8 +188,9 @@
 
     .palettes {
         display: flex;
-        flex-flow: row nowrap;
+        flex-flow: column nowrap;
         justify-content: flex-start;
+        align-items: center;
         gap: 16px;
     }
 
@@ -132,8 +200,10 @@
         width: 11%;
     }
 
-    input[type=number] {
-        width: 60px;
+    label {
+        display: flex;
+        flex-flow: row nowrap;
+        gap: 8px;
     }
 
     canvas {
@@ -144,8 +214,9 @@
 
     .gradient {
         background-size: contain;
-        width: 256px;
+        width: 128px;
         height: 16px;
+        border: 1px solid #aaa;
     }
 
     .one {

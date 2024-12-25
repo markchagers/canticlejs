@@ -1,6 +1,7 @@
 // set some other properties
 
 export interface ICantOptions {
+    background: string;
     formule: number;
     steps: number;
     updateInterval: number;
@@ -9,6 +10,7 @@ export interface ICantOptions {
     edgeBehavior: 'transparent' | 'opaque' | 'reflect';
     initPoints: 'random' | 'regular';
     initNumber: number;
+    stopOn10: boolean;
     scrolling: boolean;
     paletteImage?: OffscreenCanvasRenderingContext2D;
 }
@@ -24,7 +26,11 @@ export class Canticle {
     private colors!: string[];
     private options!: ICantOptions;
     private line = 0;
-    private myUpdate = 0;
+    private update = 0;
+    private iterations = 0;
+    private paused = false;
+    private frameRef!: number;
+    private iterationCallback?: (iterations: number) => void;
 
     constructor(canvas: HTMLCanvasElement, ca_options: ICantOptions) {
         const dest = canvas.getContext('2d');
@@ -41,13 +47,31 @@ export class Canticle {
                 this.pointsCount = this.options.initNumber;
                 this.points = [];
                 // initialise display colors
-                this.colors = this.initColors('#000', this.options.steps);
+                this.initColors(this.options.background ?? '#000', this.options.steps);
             }
         }
     }
 
+    cleanUp = () => {
+        cancelAnimationFrame(this.frameRef);
+        this.paused = true;
+        this.iterationCallback = undefined;
+    };
+
+    pauseResume = (): boolean => {
+        this.paused = !this.paused;
+        if (!this.paused) {
+            this.drawStep();
+        }
+        return this.paused;
+    };
+
     getColors = (): string[] => {
         return this.colors;
+    };
+
+    getIterations = (callback: (iterations: number) => void): void => {
+        this.iterationCallback = callback;
     };
 
     drawCanticle = () => {
@@ -63,14 +87,14 @@ export class Canticle {
             this.points[hoei] = this.colors.length - 1;
         }
 
-        this.myUpdate = 1;
+        this.update = 1;
 
         // blank the offscreen bitmap with CAColors[0] (the background color)
         this.osBitmap.fillRect(0, 0, this.width, this.height);
         // copy this to the destination image as well
         this.destBitmap.drawImage(this.osCanvas, 0, 0);
         this.line = 0;
-        requestAnimationFrame(this.drawStep);
+        this.drawStep();
     };
 
     drawStep = () => {
@@ -78,11 +102,11 @@ export class Canticle {
         this.drawCALine();
         // blit the offscreen bitmap to stage if specified chunk size has been rendered
         // further optimisation is possible here
-        if (this.options.updateInterval <= this.myUpdate) {
+        if (this.options.updateInterval <= this.update) {
             this.destBitmap?.drawImage(this.osCanvas, 0, 0);
-            this.myUpdate = 0;
+            this.update = 0;
         }
-        this.myUpdate++;
+        this.update++;
         // check for image full
         if (this.line < this.height - 1) {
             this.line++;
@@ -107,17 +131,23 @@ export class Canticle {
                 // set the next line to draw
                 this.line = this.line - this.options.updateInterval + 1;
                 // set myUpdate = 0, so no update comes before the screen is full again
-                this.myUpdate = 0;
+                this.update = 0;
             } else {
                 this.line = 0;
             }
         }
-        requestAnimationFrame(this.drawStep);
+        this.iterations++;
+        if (this.iterationCallback) {
+            this.iterationCallback(this.iterations);
+        }
+        this.paused = this.paused || (this.options.stopOn10 && Math.max(...this.points) < 2);
+        if (!this.paused) {
+            this.frameRef = requestAnimationFrame(this.drawStep);
+        }
     };
 
     newCALine = (formule: number, numColors: number, edge: 'transparent' | 'opaque' | 'reflect'): number[] => {
         //   this calculates a new line from the values in points
-        //   the new values are returned, will be drawn by drawCALine
         return this.points.map((pt, i) => {
             let newPt = 0;
             //  use the selected formula
@@ -203,7 +233,7 @@ export class Canticle {
 
     getOldPoint = (index: number, edge: 'transparent' | 'opaque' | 'reflect' = 'reflect') => {
         // this function is used by newCALine, it returns the oldPoint[index],
-        // unless index is out of bounds: index > the number of colors or index < 1
+        // unless index is out of bounds: index > the number of points or index < 0
         // the value returned then is determined by the uncommented lines below
         if (index < 0) {
             switch (edge) {
@@ -248,8 +278,8 @@ export class Canticle {
         });
     };
 
-    initColors = (CABackColor: string, num: number): string[] => {
-        const colors: string[] = [];
+    initColors = (CABackColor: string, num: number) => {
+        const CAColors: string[] = [];
         if (this.options.paletteImage) {
             const ctx = this.options.paletteImage;
             // create 256 color palette
@@ -257,19 +287,18 @@ export class Canticle {
                 const pixel = ctx.getImageData(i, 0, 1, 1);
                 const data = pixel.data;
                 const rgbColor = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
-                colors.push(rgbColor);
+                CAColors.push(rgbColor);
             }
         } else {
             // create 256 color palette
             for (let i = 0; i < 255; i++) {
-                colors.push(`rgb(${i}, ${Math.round(i * 0.8)}, ${Math.round(i * 0.4)})`);
+                CAColors.push(`rgb(${i}, ${Math.round(i * 0.8)}, ${Math.round(i * 0.4)})`);
             }
         }
         // map the entire palette to the user selected number of colors
-        const CAColors = [CABackColor];
+        this.colors = [CABackColor];
         for (let i = 1; i < num; i++) {
-            CAColors.push(colors[Math.round((i * 255) / num)]);
+            this.colors.push(CAColors[Math.round((i * 255) / num)]);
         }
-        return CAColors;
     };
 }
