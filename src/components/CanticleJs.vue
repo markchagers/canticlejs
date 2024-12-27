@@ -103,23 +103,21 @@
                     <input type="number" v-model="stepCount" id="stepcount">
                 </label>
                 <label for="startcount" title="Het aantal startpunten">
-                    Startpunten:
+                    Aantal startpunten:
                     <input type="number" v-model="startCount" id="startcount">
                 </label>
                 <label for="checkrandom" title="Willekeurige verdeling van de startpunten">
                     <input id="checkrandom" type="checkbox" v-model="startRandom">
-                    Random
+                    Random positie startpunten
                 </label>
                 <label for="checkstop" title="Stop als het oninteressant wordt">
                     <input id="checkstop" type="checkbox" v-model="stop10">
-                    Stop 1-0
+                    Stop bij alleen 1 of 0
                 </label>
-                <button v-if="started" @click="pauseResume()">{{ buttonText }}</button>
-                <button @click="start()">Start</button>
                 <span>Iteraties: {{ iterations }}</span>
             </div>
             <div class="palettes" title="Kies het kleurenpalet en de achtergrondkleur">
-                <span> Kleuren:</span>
+                <span>Kleuren:</span>
                 <label for="one">
                     <input type="radio" name="gradient" v-model="palette" value="one" id="one">
                     <div class="gradient one"></div>
@@ -148,9 +146,13 @@
                     </label>
                 </label>
             </div>
+            <div class="control">
+                <button @click="start()">Start</button>
+                <button v-if="started" @click="pauseResume()">{{ buttonText }}</button>
+            </div>
         </div>
         <div class="canticle">
-            <canvas width="1000" height="800" ref="cantvas"></canvas>
+            <canvas width="1001" height="800" ref="cantvas"></canvas>
             <div class="colors">
                 <div v-for="chip in colorChips" :key="chip" :style="`background-color: ${chip};`"></div>
             </div>
@@ -171,15 +173,18 @@
         display: flex;
         flex-flow: column nowrap;
         align-items: center;
+        gap: 16px;
     }
 
     .control {
         display: flex;
         flex-flow: column nowrap;
-        gap: 16px;
+        gap: 8px;
     }
 
     .colors {
+        background-color: #aaa;
+        padding: 1px;
         display: flex;
         flex-flow: row nowrap;
         justify-content: stretch;
@@ -192,6 +197,21 @@
         justify-content: flex-start;
         align-items: center;
         gap: 16px;
+    }
+
+    input[type=number] {
+        width: 60px;
+    }
+
+    button {
+        height: 24px;
+        width: fit-content;
+        padding: 0 16px;
+    }
+
+    .palettes span {
+        margin-bottom: -10px;
+        margin-top: 16px;
     }
 
     .colors div {
@@ -208,8 +228,6 @@
     }
 
     canvas {
-        width: 1000px;
-        height: 800px;
         background-color: black;
     }
 

@@ -83,7 +83,8 @@ export class Canticle {
         // set up initial points
         const randomDist = this.options.initPoints === 'random';
         for (let i = 0; i < this.pointsCount; i++) {
-            const hoei = Math.round(randomDist ? Math.random() * (this.width + 2) : ((i + 1) * this.width) / (this.pointsCount + 1));
+            const hoei = Math.round(randomDist ? Math.random() * (this.width + 2) : ((i + 1) * this.width - 1) / (this.pointsCount + 1));
+            console.log('width: ', this.width, 'position: ', hoei);
             this.points[hoei] = this.colors.length - 1;
         }
 
