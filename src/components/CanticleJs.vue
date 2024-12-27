@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import { ref } from 'vue';
     import { Canticle, type ICantOptions } from '../process/canticle';
+    import { getGradients } from '../process/fileread';
 
     type TOption = {
         label: string;
@@ -34,6 +35,8 @@
         ['one', 1], ['two', 2], ['three', 3]
     ]);
 
+    const gradientFiles = ref<{ label: string, value: string }[]>([]);
+
     const pauseResume = () => {
         buttonText.value = canticle?.pauseResume() ? 'Ga door' : 'Pauzeer'
     }
@@ -42,6 +45,21 @@
         canticle?.cleanUp();
         canticle = null;
         colorChips.value = [];
+
+        getGradients('/canticle/gradients').then((files) => {
+            files.forEach(f => {
+                gradientFiles.value.push({ label: f.name, value: f.path });
+            })
+        })
+        // // const files = require.context('@/myFolder', false, /.json$/)
+        // const files = import.meta.glob(*.png');
+
+        // const fileNames = files.keys().then((resolve, reject) => {
+
+        // }).map((key: string) => key.slice(2))
+        // fileNames.forEach(f => {
+        //     console.log(f)
+        // });
     }
 
     const iterations = ref<number>();
@@ -71,7 +89,7 @@
             if (bitmap) {
                 const image = document.createElement('img');
                 const img = imageMap.get(palette.value);
-                image.src = `/canticle/gradient-${img}.png`;
+                image.src = `/canticle/gradients/gradient-${img}.png`;
                 bitmap.drawImage(image, 0, 0);
                 cantOpts.paletteImage = bitmap
             }
@@ -115,6 +133,7 @@
                     Stop bij alleen 1 of 0
                 </label>
                 <span>Iteraties: {{ iterations }}</span>
+                <button :disabled="!started" @click="pauseResume()">{{ buttonText }}</button>
             </div>
             <div class="palettes" title="Kies het kleurenpalet en de achtergrondkleur">
                 <span>Kleuren:</span>
@@ -145,10 +164,10 @@
                         Grijs
                     </label>
                 </label>
+                <span v-for="grad in gradientFiles" :key="grad.label">{{ grad.label }}</span>
             </div>
             <div class="control">
-                <button @click="start()">Start</button>
-                <button v-if="started" @click="pauseResume()">{{ buttonText }}</button>
+                <button @click="start()">Start opnieuw</button>
             </div>
         </div>
         <div class="canticle">
@@ -169,7 +188,7 @@
     }
 
     .sidebar {
-        width: 300px;
+        width: 360px;
         display: flex;
         flex-flow: column nowrap;
         align-items: center;
@@ -239,14 +258,14 @@
     }
 
     .one {
-        background-image: url(/gradient-1.png);
+        background-image: url(/gradients/gradient-1.png);
     }
 
     .two {
-        background-image: url(/gradient-2.png);
+        background-image: url(/gradients/gradient-2.png);
     }
 
     .three {
-        background-image: url(/gradient-3.png);
+        background-image: url(/gradients/gradient-3.png);
     }
 </style>
