@@ -71,7 +71,7 @@
             if (bitmap) {
                 const image = document.createElement('img');
                 const img = imageMap.get(palette.value);
-                image.src = `/src/assets/gradient-${img}.png`;
+                image.src = `/canticle/gradient-${img}.png`;
                 bitmap.drawImage(image, 0, 0);
                 cantOpts.paletteImage = bitmap
             }
@@ -132,8 +132,8 @@
                     <input type="radio" name="gradient" v-model="palette" value="three" id="three">
                     <div class="gradient three"></div>
                 </label>
+                <span>Achtergrondkleur:</span>
                 <label>
-                    Achtergrondkleur:
                     <label for="zwart">
                         <input type="radio" name="background" v-model="bgColor" value="#000" id="zwart">
                         Zwart
@@ -167,7 +167,7 @@
     }
 
     .sidebar {
-        flex: 240px;
+        width: 300px;
         display: flex;
         flex-flow: column nowrap;
         align-items: center;
@@ -203,6 +203,7 @@
     label {
         display: flex;
         flex-flow: row nowrap;
+        align-items: center;
         gap: 8px;
     }
 
@@ -220,14 +221,14 @@
     }
 
     .one {
-        background-image: url(/src/assets/gradient-1.png);
+        background-image: url(/gradient-1.png);
     }
 
     .two {
-        background-image: url(/src/assets/gradient-2.png);
+        background-image: url(/gradient-2.png);
     }
 
     .three {
-        background-image: url(/src/assets/gradient-3.png);
+        background-image: url(/gradient-3.png);
     }
 </style>
