@@ -37,10 +37,10 @@ export class Canticle {
         if (dest) {
             this.width = canvas.width;
             this.height = canvas.height;
-            const osbm = new OffscreenCanvas(this.width, this.height);
-            const osCtx = osbm.getContext('2d');
-            if (osbm && osCtx) {
-                this.osCanvas = osbm;
+            const oscv = new OffscreenCanvas(this.width, this.height);
+            const osCtx = oscv.getContext('2d');
+            if (oscv && osCtx) {
+                this.osCanvas = oscv;
                 this.osBitmap = osCtx;
                 this.destBitmap = dest;
                 this.options = ca_options;
@@ -51,6 +51,29 @@ export class Canticle {
             }
         }
     }
+
+    drawCanticle = () => {
+        // initialise line buffer
+        for (let i = 0; i < this.width; i++) {
+            this.points[i] = 0;
+        }
+
+        // set up initial points
+        const randomDist = this.options.initPoints === 'random';
+        for (let i = 0; i < this.pointsCount; i++) {
+            const hoei = Math.floor(randomDist ? Math.random() * (this.width + 2) : (i + 1) * (this.width / (this.pointsCount + 1)));
+            this.points[hoei] = this.colors.length - 1;
+        }
+
+        this.update = 1;
+
+        // blank the offscreen bitmap with CAColors[0] (the background color)
+        this.osBitmap.fillRect(0, 0, this.width, this.height);
+        // copy this to the destination image as well
+        this.destBitmap.drawImage(this.osCanvas, 0, 0);
+        this.line = 0;
+        this.drawStep();
+    };
 
     cleanUp = () => {
         cancelAnimationFrame(this.frameRef);
@@ -72,30 +95,6 @@ export class Canticle {
 
     getIterations = (callback: (iterations: number) => void): void => {
         this.iterationCallback = callback;
-    };
-
-    drawCanticle = () => {
-        // initialise line buffer
-        for (let i = 0; i < this.width; i++) {
-            this.points[i] = 0;
-        }
-
-        // set up initial points
-        const randomDist = this.options.initPoints === 'random';
-        for (let i = 0; i < this.pointsCount; i++) {
-            const hoei = Math.floor(randomDist ? Math.random() * (this.width + 2) : (i + 1) * (this.width / (this.pointsCount + 1)));
-            console.log('width: ', this.width, 'position: ', hoei);
-            this.points[hoei] = this.colors.length - 1;
-        }
-
-        this.update = 1;
-
-        // blank the offscreen bitmap with CAColors[0] (the background color)
-        this.osBitmap.fillRect(0, 0, this.width, this.height);
-        // copy this to the destination image as well
-        this.destBitmap.drawImage(this.osCanvas, 0, 0);
-        this.line = 0;
-        this.drawStep();
     };
 
     drawStep = () => {
@@ -154,11 +153,11 @@ export class Canticle {
             //  use the selected formula
             switch (formule) {
                 case 1:
-                    // /* zeer faksinerend!!*/
+                    // /* Basis formule */
                     newPt = pt - 1 + 2 * Math.abs(this.getOldPoint(i - 1, edge) - this.getOldPoint(i + 1, edge));
                     break;
                 case 2:
-                    // /* nog dichter bij amiga programma! */
+                    // /* lijkt op amiga programma */
                     newPt = Math.abs(pt - 1) * (1 + 2 * Math.abs(this.getOldPoint(i - 1, edge) - this.getOldPoint(i + 1, edge)));
                     break;
                 case 3:
@@ -281,10 +280,12 @@ export class Canticle {
 
     initColors = (CABackColor: string, num: number) => {
         const CAColors: string[] = [];
+        let canWidth = 256;
         if (this.options.paletteImage) {
             const ctx = this.options.paletteImage;
-            // create 256 color palette
-            for (let i = 0; i < 255; i++) {
+            // create color palette with 1 color per pixel
+            canWidth = ctx.canvas.width;
+            for (let i = 0; i < canWidth; i++) {
                 const pixel = ctx.getImageData(i, 0, 1, 1);
                 const data = pixel.data;
                 const rgbColor = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
@@ -299,7 +300,7 @@ export class Canticle {
         // map the entire palette to the user selected number of colors
         this.colors = [CABackColor];
         for (let i = 1; i < num; i++) {
-            this.colors.push(CAColors[Math.round((i * 255) / num)]);
+            this.colors.push(CAColors[Math.round((i * canWidth) / num)]);
         }
     };
 }

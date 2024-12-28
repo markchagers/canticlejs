@@ -1,65 +1,57 @@
 <script setup lang="ts">
-    import { ref } from 'vue';
+    import { onMounted, ref } from 'vue';
     import { Canticle, type ICantOptions } from '../process/canticle';
-    import { getGradients } from '../process/fileread';
 
     type TOption = {
         label: string;
-        formula: number
+        value: number | string
     }
 
-    const selectedFormula = ref<TOption>({ label: 'zeer fascinerend!!', formula: 1 });
+    const selectedFormula = ref<TOption>({ label: 'zeer fascinerend!!', value: 1 });
+    const selectedPalette = ref<TOption>();
+
+    const gradients: TOption[] = [
+        { value: '/canticle/gradients/gradient-1.png', label: 'gradient-1' },
+        { value: '/canticle/gradients/gradient-2.png', label: 'gradient-2' },
+        { value: '/canticle/gradients/gradient-3.png', label: 'gradient-3' },
+        { value: '/canticle/gradients/gradient-4.png', label: 'gradient-4' },
+        { value: '/canticle/gradients/gradient-5.png', label: 'gradient-5' },
+    ];
 
     const formulaOptions: TOption[] = [
-        { label: 'zeer fascinerend!!', formula: 1 },
-        { label: 'als amiga programma!', formula: 2 },
-        { label: 'ook wel aardig', formula: 3 },
-        { label: 'wel aardig', formula: 4 },
-        { label: 'heel mooi', formula: 5 },
-        { label: 'formule 6', formula: 6 },
-        { label: 'formule 7', formula: 7 },
-        { label: 'kerstboom met kaarsjes', formula: 8 },
-        { label: 'wel aardig 3', formula: 9 },
+        { label: 'Basis formule', value: 1 },
+        { label: 'Als amiga programma', value: 2 },
+        { label: 'formule 3', value: 3 },
+        { label: 'formule 4', value: 4 },
+        { label: 'formule 5', value: 5 },
+        { label: 'formule 6', value: 6 },
+        { label: 'formule 7', value: 7 },
+        { label: 'kerstboom met kaarsjes', value: 8 },
+        { label: 'formule 9', value: 9 },
     ];
 
     const colorChips = ref<string[]>([]);
     const stepCount = ref(32);
-    const startCount = ref(3);
-    const startRandom = ref(true);
-    const palette = ref<'one' | 'two' | 'three'>('one');
+    const startCount = ref(1);
+    const startRandom = ref(false);
     const bgColor = ref('#000');
     const stop10 = ref(true);
-    const buttonText = ref('Pauzeer');
+    const pauseBtnText = ref('Pauzeer');
     const started = ref(false);
-    const imageMap = new Map<string, number>([
-        ['one', 1], ['two', 2], ['three', 3]
-    ]);
 
-    const gradientFiles = ref<{ label: string, value: string }[]>([]);
+    onMounted(() => {
+        selectedFormula.value = formulaOptions[0];
+        selectedPalette.value = gradients[0];
+    });
 
     const pauseResume = () => {
-        buttonText.value = canticle?.pauseResume() ? 'Ga door' : 'Pauzeer'
+        pauseBtnText.value = canticle?.pauseResume() ? 'Ga door' : 'Pauzeer'
     }
 
     const cleanUp = () => {
         canticle?.cleanUp();
         canticle = null;
         colorChips.value = [];
-
-        getGradients('/canticle/gradients').then((files) => {
-            files.forEach(f => {
-                gradientFiles.value.push({ label: f.name, value: f.path });
-            })
-        })
-        // // const files = require.context('@/myFolder', false, /.json$/)
-        // const files = import.meta.glob(*.png');
-
-        // const fileNames = files.keys().then((resolve, reject) => {
-
-        // }).map((key: string) => key.slice(2))
-        // fileNames.forEach(f => {
-        //     console.log(f)
-        // });
     }
 
     const iterations = ref<number>();
@@ -73,7 +65,7 @@
         if (cantvas.value && selected) {
             const cantOpts: ICantOptions = {
                 background: bgColor.value,
-                formule: selected.formula,
+                formule: selected.value as number,
                 steps: stepCount.value,
                 updateInterval: 1,
                 maxOverflow: 1,
@@ -84,12 +76,11 @@
                 stopOn10: stop10.value,
                 scrolling: true,
             }
-            const cv = new OffscreenCanvas(256, 2);
+            const cv = new OffscreenCanvas(512, 4);
             const bitmap = cv.getContext('2d');
             if (bitmap) {
                 const image = document.createElement('img');
-                const img = imageMap.get(palette.value);
-                image.src = `/canticle/gradients/gradient-${img}.png`;
+                image.src = selectedPalette.value?.value as string ?? 'gradient-1';
                 bitmap.drawImage(image, 0, 0);
                 cantOpts.paletteImage = bitmap
             }
@@ -99,7 +90,7 @@
             canticle.drawCanticle();
             colorChips.value = canticle.getColors();
             started.value = true;
-            buttonText.value = 'Pauzeer';
+            pauseBtnText.value = 'Pauzeer';
         }
     }
 </script>
@@ -112,7 +103,7 @@
                 <label for="formule" title="De formule waarmee gerekend wordt">
                     Formule:
                     <select name="formule" id="formule" v-model="selectedFormula">
-                        <option v-for="opt in formulaOptions" :key="opt.formula" :value="opt">{{
+                        <option v-for="opt in formulaOptions" :key="opt.value" :value="opt">{{
                             opt.label }}</option>
                     </select>
                 </label>
@@ -133,39 +124,33 @@
                     Stop bij alleen 1 of 0
                 </label>
                 <span>Iteraties: {{ iterations }}</span>
-                <button :disabled="!started" @click="pauseResume()">{{ buttonText }}</button>
+                <button :disabled="!started" @click="pauseResume()">{{ pauseBtnText }}</button>
             </div>
-            <div class="palettes" title="Kies het kleurenpalet en de achtergrondkleur">
-                <span>Kleuren:</span>
-                <label for="one">
-                    <input type="radio" name="gradient" v-model="palette" value="one" id="one">
-                    <div class="gradient one"></div>
-                </label>
-                <label for="two">
-                    <input type="radio" name="gradient" v-model="palette" value="two" id="two">
-                    <div class="gradient two"></div>
-                </label>
-                <label for="three">
-                    <input type="radio" name="gradient" v-model="palette" value="three" id="three">
-                    <div class="gradient three"></div>
-                </label>
-                <span>Achtergrondkleur:</span>
-                <label>
-                    <label for="zwart">
-                        <input type="radio" name="background" v-model="bgColor" value="#000" id="zwart">
-                        Zwart
+            <details>
+                <summary>Kleuren:</summary>
+                <span>Palet:</span>
+                <div class="palettes" title="Kies het kleurenpalet en de achtergrondkleur">
+                    <label v-for="grad in gradients" :key="grad.label" :for="grad.label">
+                        <input type="radio" name="gradient" v-model="selectedPalette" :value="grad" :id="grad.label">
+                        <div class="gradient" :style="{ 'background-image': 'url(' + grad.value + ')' }"></div>
                     </label>
-                    <label for="wit">
-                        <input type="radio" name="background" v-model="bgColor" value="#fff" id="wit">
-                        Wit
+                    <span>Achtergrondkleur:</span>
+                    <label>
+                        <label for="zwart">
+                            <input type="radio" name="background" v-model="bgColor" value="#000" id="zwart">
+                            Zwart
+                        </label>
+                        <label for="wit">
+                            <input type="radio" name="background" v-model="bgColor" value="#fff" id="wit">
+                            Wit
+                        </label>
+                        <label for="grijs">
+                            <input type="radio" name="background" v-model="bgColor" value="#ccc" id="grijs">
+                            Grijs
+                        </label>
                     </label>
-                    <label for="grijs">
-                        <input type="radio" name="background" v-model="bgColor" value="#ccc" id="grijs">
-                        Grijs
-                    </label>
-                </label>
-                <span v-for="grad in gradientFiles" :key="grad.label">{{ grad.label }}</span>
-            </div>
+                </div>
+            </details>
             <div class="control">
                 <button @click="start()">Start opnieuw</button>
             </div>
@@ -188,10 +173,12 @@
     }
 
     .sidebar {
-        width: 360px;
+        flex: 0 0 320px;
+        width: 320px;
+        padding: 0 16px;
         display: flex;
         flex-flow: column nowrap;
-        align-items: center;
+        align-items: stretch;
         gap: 16px;
     }
 
@@ -246,6 +233,10 @@
         gap: 8px;
     }
 
+    details>label {
+        margin: 10px 0;
+    }
+
     canvas {
         background-color: black;
     }
@@ -255,17 +246,5 @@
         width: 128px;
         height: 16px;
         border: 1px solid #aaa;
-    }
-
-    .one {
-        background-image: url(/gradients/gradient-1.png);
-    }
-
-    .two {
-        background-image: url(/gradients/gradient-2.png);
-    }
-
-    .three {
-        background-image: url(/gradients/gradient-3.png);
     }
 </style>
