@@ -3,8 +3,8 @@
 export interface ICantOptions {
     background: string;
     formule: number;
-    steps: number;
-    updateInterval: number;
+    levels: number;
+    maxIterations: number;
     maxOverflow: number;
     minOverflow: number;
     edgeBehavior: 'transparent' | 'opaque' | 'reflect';
@@ -26,11 +26,11 @@ export class Canticle {
     private colors!: string[];
     private options!: ICantOptions;
     private line = 0;
-    private update = 0;
     private iterations = 0;
     private paused = false;
     private frameRef!: number;
     private iterationCallback?: (iterations: number) => void;
+    private pausedCallback?: (state: boolean) => void;
 
     constructor(canvas: HTMLCanvasElement, ca_options: ICantOptions) {
         const dest = canvas.getContext('2d');
@@ -47,7 +47,7 @@ export class Canticle {
                 this.pointsCount = this.options.initNumber;
                 this.points = [];
                 // initialise display colors
-                this.initColors(this.options.background ?? '#000', this.options.steps);
+                this.initColors(this.options.background ?? '#000', this.options.levels);
             }
         }
     }
@@ -65,9 +65,8 @@ export class Canticle {
             this.points[hoei] = this.colors.length - 1;
         }
 
-        this.update = 1;
-
         // blank the offscreen bitmap with CAColors[0] (the background color)
+        this.osBitmap.fillStyle = this.colors[0];
         this.osBitmap.fillRect(0, 0, this.width, this.height);
         // copy this to the destination image as well
         this.destBitmap.drawImage(this.osCanvas, 0, 0);
@@ -75,18 +74,54 @@ export class Canticle {
         this.drawStep();
     };
 
+    drawStep = () => {
+        this.points = this.newCALine(this.options.formule, this.colors.length, this.options.edgeBehavior);
+        this.drawCALine();
+        // blit the offscreen bitmap to the canvas
+        this.destBitmap?.drawImage(this.osCanvas, 0, 0);
+        // check for image full
+        if (this.line < this.height - 1) {
+            this.line++;
+        } else {
+            // image full
+            // if scrolling is on then scroll the current image up
+            if (this.options.scrolling) {
+                // blit full image to screen
+                this.destBitmap.drawImage(this.osCanvas, 0, 0);
+                // shift offscreen image up
+                this.osBitmap.drawImage(this.osCanvas, 0, 1, this.width, this.height - 1, 0, 0, this.width, this.height - 1);
+            } else {
+                this.line = 0;
+            }
+        }
+        this.iterations++;
+        if (this.iterationCallback) {
+            this.iterationCallback(this.iterations);
+        }
+        this.paused =
+            this.paused ||
+            (this.options.stopOn10 && Math.max(...this.points) < 2) ||
+            (this.options.maxIterations > 0 && this.iterations >= this.options.maxIterations);
+        if (this.pausedCallback) {
+            this.pausedCallback(this.paused);
+        }
+        if (!this.paused) {
+            this.frameRef = requestAnimationFrame(this.drawStep);
+        }
+    };
+
     cleanUp = () => {
         cancelAnimationFrame(this.frameRef);
         this.paused = true;
         this.iterationCallback = undefined;
+        this.pausedCallback = undefined;
     };
 
-    pauseResume = (): boolean => {
+    pauseResume = () => {
         this.paused = !this.paused;
         if (!this.paused) {
             this.drawStep();
         }
-        return this.paused;
     };
 
     getColors = (): string[] => {
@@ -97,53 +132,8 @@ export class Canticle {
         this.iterationCallback = callback;
     };
 
-    drawStep = () => {
-        this.points = this.newCALine(this.options.formule, this.colors.length, this.options.edgeBehavior);
-        this.drawCALine();
-        // blit the offscreen bitmap to stage if specified chunk size has been rendered
-        // further optimisation is possible here
-        if (this.options.updateInterval <= this.update) {
-            this.destBitmap?.drawImage(this.osCanvas, 0, 0);
-            this.update = 0;
-        }
-        this.update++;
-        // check for image full
-        if (this.line < this.height - 1) {
-            this.line++;
-        } else {
-            // image full
-            // if scrolling is on then scroll the current image up the current chunk size in pixels
-            if (this.options.scrolling) {
-                // blit full image to screen
-                this.destBitmap.drawImage(this.osCanvas, 0, 0);
-                // shift offscreen image up
-                this.osBitmap.drawImage(
-                    this.osCanvas,
-                    0,
-                    this.options.updateInterval,
-                    this.width,
-                    this.height - this.options.updateInterval,
-                    0,
-                    0,
-                    this.width,
-                    this.height - this.options.updateInterval,
-                );
-                // set the next line to draw
-                this.line = this.line - this.options.updateInterval + 1;
-                // set myUpdate = 0, so no update comes before the screen is full again
-                this.update = 0;
-            } else {
-                this.line = 0;
-            }
-        }
-        this.iterations++;
-        if (this.iterationCallback) {
-            this.iterationCallback(this.iterations);
-        }
-        this.paused = this.paused || (this.options.stopOn10 && Math.max(...this.points) < 2);
-        if (!this.paused) {
-            this.frameRef = requestAnimationFrame(this.drawStep);
-        }
+    getPausedState = (callback: (state: boolean) => void): void => {
+        this.pausedCallback = callback;
     };
 
     newCALine = (formule: number, numColors: number, edge: 'transparent' | 'opaque' | 'reflect'): number[] => {

@@ -16,6 +16,8 @@
         { value: '/canticle/gradients/gradient-3.png', label: 'gradient-3' },
         { value: '/canticle/gradients/gradient-4.png', label: 'gradient-4' },
         { value: '/canticle/gradients/gradient-5.png', label: 'gradient-5' },
+        { value: '/canticle/gradients/gradient-6.png', label: 'gradient-6' },
+        { value: '/canticle/gradients/gradient-7.png', label: 'gradient-7' },
     ];
 
     const formulaOptions: TOption[] = [
@@ -34,10 +36,12 @@
     const stepCount = ref(32);
     const startCount = ref(1);
     const startRandom = ref(false);
+    const scrolling = ref(true);
     const bgColor = ref('#000');
     const stop10 = ref(true);
     const pauseBtnText = ref('Pauzeer');
     const started = ref(false);
+    const maxIterations = ref(20000);
 
     onMounted(() => {
         selectedFormula.value = formulaOptions[0];
@@ -45,7 +49,7 @@
     });
 
     const pauseResume = () => {
-        pauseBtnText.value = canticle?.pauseResume() ? 'Ga door' : 'Pauzeer'
+        canticle?.pauseResume();
     }
 
     const cleanUp = () => {
@@ -66,15 +70,15 @@
             const cantOpts: ICantOptions = {
                 background: bgColor.value,
                 formule: selected.value as number,
-                steps: stepCount.value,
-                updateInterval: 1,
+                levels: stepCount.value,
+                maxIterations: maxIterations.value,
                 maxOverflow: 1,
                 minOverflow: 1,
                 edgeBehavior: 'transparent',
                 initPoints: startRandom.value ? 'random' : 'regular',
                 initNumber: startCount.value,
                 stopOn10: stop10.value,
-                scrolling: true,
+                scrolling: scrolling.value,
             }
             const cv = new OffscreenCanvas(512, 4);
             const bitmap = cv.getContext('2d');
@@ -87,6 +91,9 @@
 
             canticle = new Canticle(cantvas.value, cantOpts);
             canticle.getIterations((iter: number) => iterations.value = iter);
+            canticle.getPausedState((state: boolean) => {
+                pauseBtnText.value = state ? 'Ga door' : 'Pauzeer'
+            });
             canticle.drawCanticle();
             colorChips.value = canticle.getColors();
             started.value = true;
@@ -98,7 +105,7 @@
 <template>
     <div class="main">
         <div class="sidebar">
-            <h1>Canticle JS</h1>
+            <h1>CanticleJS</h1>
             <div class="control">
                 <label for="formule" title="De formule waarmee gerekend wordt">
                     Formule:
@@ -119,11 +126,19 @@
                     <input id="checkrandom" type="checkbox" v-model="startRandom">
                     Random positie startpunten
                 </label>
+                <label for="checkscroll" title="Scroll het beeld als het scherm vol is">
+                    <input id="checkscroll" type="checkbox" v-model="scrolling">
+                    Scroll bij vol scherm
+                </label>
                 <label for="checkstop" title="Stop als het oninteressant wordt">
                     <input id="checkstop" type="checkbox" v-model="stop10">
                     Stop bij alleen 1 of 0
                 </label>
                 <span>Iteraties: {{ iterations }}</span>
+                <label for="maxiterations" title="Maximum aantal iteraties (0 = geen limiet)">
+                    Max aantal iteraties:
+                    <input type="number" v-model="maxIterations" id="maxiterations">
+                </label>
                 <button :disabled="!started" @click="pauseResume()">{{ pauseBtnText }}</button>
             </div>
             <details>
@@ -169,13 +184,13 @@
         width: 100vw;
         display: flex;
         flex-flow: row nowrap;
-        align-items: stretch;
+        align-items: flex-start;
     }
 
     .sidebar {
         flex: 0 0 320px;
         width: 320px;
-        padding: 0 16px;
+        padding: 10px 32px;
         display: flex;
         flex-flow: column nowrap;
         align-items: stretch;
@@ -231,6 +246,36 @@
         flex-flow: row nowrap;
         align-items: center;
         gap: 8px;
+    }
+
+    details {
+        border-radius: 6px;
+        padding: 6px 10px;
+    }
+
+    details[open] {
+
+        background-color: #eee;
+    }
+
+    summary {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    summary::before {
+        content: '';
+        width: 10px;
+        height: 17px;
+        background: url('/src/assets/arrow.svg');
+        background-size: cover;
+        margin-right: .5rem;
+        transition: 0.2s;
+    }
+
+    details[open]>summary::before {
+        transform: rotate(90deg);
     }
 
     details>label {
