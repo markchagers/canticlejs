@@ -32,6 +32,7 @@
         { label: 'formule 9', value: 9 },
     ];
 
+    const helpvisible = ref(false);
     const colorChips = ref<string[]>([]);
     const stepCount = ref(32);
     const startCount = ref(1);
@@ -169,6 +170,9 @@
             <div class="control">
                 <button @click="start()">Start opnieuw</button>
             </div>
+        </div>
+        <div v-if="helpvisible" class="doc">
+
         </div>
         <div class="canticle">
             <canvas width="1001" height="800" ref="cantvas"></canvas>
