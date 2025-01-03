@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import { onMounted, ref } from 'vue';
     import { Canticle, type ICantOptions } from '../process/canticle';
+    import DocViewer from './DocViewer.vue';
 
     type TOption = {
         label: string;
@@ -105,8 +106,10 @@
 
 <template>
     <div class="main">
+        <DocViewer v-if="helpvisible" class="doc"></DocViewer>
         <div class="sidebar">
             <h1>CanticleJS</h1>
+            <button @click="helpvisible = true">Help</button>
             <div class="control">
                 <label for="formule" title="De formule waarmee gerekend wordt">
                     Formule:
@@ -170,9 +173,6 @@
             <div class="control">
                 <button @click="start()">Start opnieuw</button>
             </div>
-        </div>
-        <div v-if="helpvisible" class="doc">
-
         </div>
         <div class="canticle">
             <canvas width="1001" height="800" ref="cantvas"></canvas>
