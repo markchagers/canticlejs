@@ -5,11 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "chrome",
+            "name": "Dev in Chrome",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
+            "type": "chrome",
             "preLaunchTask": "npm: dev",
             "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "Preview in Chrome",
+            "request": "launch",
+            "type": "chrome",
+            "preLaunchTask": "npm: preview",
+            "url": "http://localhost:4173",
             "webRoot": "${workspaceFolder}"
         }
     ]

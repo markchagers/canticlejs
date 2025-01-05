@@ -7,7 +7,7 @@
             "isBackground": true,
             "presentation": {
                 "focus": true,
-                "panel": "dedicated",
+                "panel": "dedicated"
             },
             "group": {
                 "kind": "build",
@@ -17,10 +17,36 @@
                 "owner": "typescript",
                 "source": "ts",
                 "applyTo": "allDocuments",
-                "fileLocation": [
-                    "relative",
-                    "${cwd}"
-                ],
+                "fileLocation": ["relative", "${cwd}"],
+                "pattern": "$tsc",
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": {
+                        "regexp": "(.*?)"
+                    },
+                    "endsPattern": {
+                        "regexp": "➜  Local:"
+                    }
+                }
+            }
+        },
+        {
+            "type": "npm",
+            "script": "preview",
+            "isBackground": true,
+            "presentation": {
+                "focus": true,
+                "panel": "dedicated"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": {
+                "owner": "typescript",
+                "source": "ts",
+                "applyTo": "allDocuments",
+                "fileLocation": ["relative", "${cwd}"],
                 "pattern": "$tsc",
                 "background": {
                     "activeOnStart": true,
