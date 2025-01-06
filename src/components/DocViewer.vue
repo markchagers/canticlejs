@@ -3,34 +3,39 @@
     import { ref, watchEffect } from 'vue';
     import { useLanguageStore } from '../store/language';
 
-    const langStore = useLanguageStore()
+    const langStore = useLanguageStore();
     const props = defineProps<{ language: 'nl' | 'en' }>();
     type content = 'howto' | 'whatis' | 'background';
     const tab = ref<content>('whatis');
     const result = ref('');
     watchEffect(async () => {
         const url = `/canticle/doc/${tab.value}-${props.language}.md`;
-        fetch(url).then(r => r.text()).then(t => marked(t)).then(html => result.value = html)
+        fetch(url)
+            .then(r => r.text())
+            .then(t => marked(t))
+            .then(html => (result.value = html));
     });
 
-    const emit = defineEmits(['close'])
+    const emit = defineEmits(['close']);
 </script>
 
 <template>
     <div class="docs">
         <div class="tabs">
             <div class="btn" @click="tab = 'whatis'" :class="{ special: tab === 'whatis' }">
-                {{ langStore.getLangString('Wat is CanticleJS?') }}</div>
+                {{ langStore.getLangString('Wat is CanticleJS?') }}
+            </div>
             <div class="btn" @click="tab = 'howto'" :class="{ special: tab === 'howto' }">
-                {{ langStore.getLangString('Gebruiksaanwijzing') }}</div>
+                {{ langStore.getLangString('Gebruiksaanwijzing') }}
+            </div>
             <div class="btn" @click="tab = 'background'" :class="{ special: tab === 'background' }">
-                {{ langStore.getLangString('Achtergrond') }}</div>
+                {{ langStore.getLangString('Achtergrond') }}
+            </div>
             <button class="close" @click="emit('close')">
                 <div> </div>
             </button>
         </div>
-        <div class="page" v-html="result">
-        </div>
+        <div class="page" v-html="result"></div>
     </div>
 </template>
 
