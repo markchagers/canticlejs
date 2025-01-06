@@ -62,7 +62,7 @@
         colorChips.value = [];
     }
 
-    const iterations = ref<number>();
+    const iterations = ref<number>(0);
 
     let canticle: Canticle | null;
 
@@ -112,44 +112,48 @@
         <div class="sidebar">
             <h1>CanticleJS</h1>
             <div class="langbtns">
-                <button class="lang" @click="langStore.lang = 'nl'">🇳🇱</button>
-                <button class="lang" @click="langStore.lang = 'en'">🇬🇧</button>
-                <div>{{ langStore.lang }}</div>
+                <button class="lang" :class="{ active: langStore.lang === 'nl' }"
+                    @click="langStore.lang = 'nl'">🇳🇱</button>
+                <button class="lang" :class="{ active: langStore.lang === 'en' }"
+                    @click="langStore.lang = 'en'">🇬🇧</button>
+                <div>{{ langStore.lang === 'nl' ? 'Nederlands' : 'English' }}</div>
             </div>
             <button @click="helpvisible = true">Help</button>
             <div class="control">
-                <label for="formule" title="De formule waarmee gerekend wordt">
+                <label for="formule" :title="langStore.getLangString('De formule waarmee gerekend wordt')">
                     {{ langStore.getLangString('Formule') }}:
                     <select name="formule" id="formule" v-model="selectedFormula">
                         <option v-for="opt in formulaOptions" :key="opt.value" :value="opt">{{
                             opt.label }}</option>
                     </select>
                 </label>
-                <label for="stepcount" title="Aantal stappen (kleuren) van de berekening">
+                <label for="stepcount" :title="langStore.getLangString('Aantal stappen (kleuren) van de berekening')">
                     {{ langStore.getLangString('Stappen') }}:
                     <input type="number" v-model="stepCount" id="stepcount">
                 </label>
-                <label for="startcount" title="Het aantal startpunten">
+                <label for="startcount" :title="langStore.getLangString('Het aantal startpunten')">
                     {{ langStore.getLangString('Aantal startpunten') }}:
                     <input type="number" v-model="startCount" id="startcount">
                 </label>
-                <label for="checkrandom" title="Willekeurige verdeling van de startpunten">
+                <label for="checkrandom" :title="langStore.getLangString('Willekeurige verdeling van de startpunten')">
                     <input id="checkrandom" type="checkbox" v-model="startRandom">
                     {{ langStore.getLangString('Random positie startpunten') }}
 
                 </label>
-                <label for="checkscroll" title="Scroll het beeld als het scherm vol is">
+                <label for="checkscroll" :title="langStore.getLangString('Scroll het beeld als het scherm vol is')">
                     <input id="checkscroll" type="checkbox" v-model="scrolling">
                     {{ langStore.getLangString('Scroll bij vol scherm') }}
 
                 </label>
-                <label for="checkstop" title="Stop als het oninteressant wordt">
+                <label for="checkstop" :title="langStore.getLangString('Stop als het oninteressant wordt')">
                     <input id="checkstop" type="checkbox" v-model="stop10">
                     {{ langStore.getLangString('Stop bij alleen 1 of 0') }}
 
                 </label>
-                <span>Iteraties: {{ iterations }}</span>
-                <label for="maxiterations" title="Maximum aantal iteraties (0 = geen limiet)">
+                <span :title="langStore.getLangString('Aantal gegenereerde regels')">{{
+                    langStore.getLangString('Iteraties') }}: {{ iterations }}</span>
+                <label for="maxiterations"
+                    :title="langStore.getLangString('Maximum aantal iteraties (0 = geen limiet)')">
                     {{ langStore.getLangString('Max aantal iteraties') }}:
                     <input type="number" v-model="maxIterations" id="maxiterations">
                 </label>
@@ -159,7 +163,7 @@
                 <summary>{{ langStore.getLangString('Kleuren') }}:</summary>
                 <span>{{ langStore.getLangString('Palet') }}:</span>
 
-                <div class="palettes" title="Kies het kleurenpalet en de achtergrondkleur">
+                <div class="palettes" :title="langStore.getLangString('Kies het kleurenpalet en de achtergrondkleur')">
                     <label v-for="grad in gradients" :key="grad.label" :for="grad.label">
                         <input type="radio" name="gradient" v-model="selectedPalette" :value="grad" :id="grad.label">
                         <div class="gradient" :style="{ 'background-image': 'url(' + grad.value + ')' }"></div>
@@ -219,7 +223,7 @@
     }
 
     .colors {
-        background-color: #aaa;
+        background-color: var(--color-background-muted);
         padding: 1px;
         display: flex;
         flex-flow: row nowrap;
@@ -246,18 +250,29 @@
     }
 
     .langbtns {
+        width: 100%;
+        height: fit-content;
         display: flex;
         flex-flow: row nowrap;
-        gap: 16px;
+        gap: 8px;
         align-items: center;
     }
 
     button.lang {
-        width: 24px;
-        height: 24px;
+        padding: 0 4px;
+        height: fit-content;
+        line-height: 2rem;
         border: 0;
         background-color: transparent;
         font-size: 2rem;
+        cursor: pointer;
+        border-radius: 4px;
+        border: 2px solid;
+        border-color: transparent;
+    }
+
+    button.lang.active {
+        border-color: var(--color-select);
     }
 
     .palettes span {
@@ -284,24 +299,25 @@
     }
 
     details[open] {
-
-        background-color: #eee;
+        background-color: var(--color-background-soft);
     }
 
     summary {
         cursor: pointer;
         display: flex;
         align-items: center;
+        list-style: none;
     }
 
     summary::before {
+        --svg: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 23"><polyline fill="transparent" points="2,2 12,11 2,21" stroke="currentColor" stroke-linejoin="round" stroke-linecap="round" stroke-width="3" /></svg>');
         content: '';
         width: 10px;
         height: 17px;
-        background: url('/src/assets/arrow.svg');
-        background-size: cover;
         margin-right: .5rem;
         transition: 0.2s;
+        background-color: var(--color-text);
+        mask: var(--svg);
     }
 
     details[open]>summary::before {
@@ -320,6 +336,6 @@
         background-size: contain;
         width: 128px;
         height: 16px;
-        border: 1px solid #aaa;
+        border: 1px solid var(--color-background-mute);
     }
 </style>

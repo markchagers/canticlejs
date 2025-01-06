@@ -1,4 +1,4 @@
-# 1  Wat is CanticleJS?
+# Wat is CanticleJS?
 
 nog te vertalen
 

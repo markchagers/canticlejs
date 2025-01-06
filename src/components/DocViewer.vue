@@ -1,7 +1,9 @@
 <script setup lang="ts">
     import { marked } from 'marked';
     import { ref, watchEffect } from 'vue';
+    import { useLanguageStore } from '../store/language';
 
+    const langStore = useLanguageStore()
     const props = defineProps<{ language: 'nl' | 'en' }>();
     type content = 'howto' | 'whatis' | 'background';
     const tab = ref<content>('whatis');
@@ -17,10 +19,14 @@
 <template>
     <div class="docs">
         <div class="tabs">
-            <div class="btn" @click="tab = 'whatis'" :class="{ special: tab === 'whatis' }">Wat is CanticleJS?</div>
-            <div class="btn" @click="tab = 'howto'" :class="{ special: tab === 'howto' }">Hoe gebruik je het?</div>
-            <div class="btn" @click="tab = 'background'" :class="{ special: tab === 'background' }">Achtergrond</div>
-            <button @click="emit('close')">Close</button>
+            <div class="btn" @click="tab = 'whatis'" :class="{ special: tab === 'whatis' }">
+                {{ langStore.getLangString('Wat is CanticleJS?') }}</div>
+            <div class="btn" @click="tab = 'howto'" :class="{ special: tab === 'howto' }">
+                {{ langStore.getLangString('Gebruiksaanwijzing') }}</div>
+            <div class="btn" @click="tab = 'background'" :class="{ special: tab === 'background' }">
+                {{ langStore.getLangString('Achtergrond') }}</div>
+            <button @click="emit('close')">✖︎
+            </button>
         </div>
         <div class="page" v-html="result">
         </div>

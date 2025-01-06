@@ -1,4 +1,4 @@
-# 3   Achtergrond
+# Achtergrond
 
 nog te vertalen 
 

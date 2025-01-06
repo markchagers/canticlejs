@@ -1,4 +1,4 @@
-# 1  What is CanticleJS?
+# What is CanticleJS?
 
 CanticleJS is the latest incarnation of a program to experiment with the phenomenon named Cellular Automatons. Basically all you can do with it is generate interesting images.
 

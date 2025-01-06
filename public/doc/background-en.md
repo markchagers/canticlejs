@@ -1,4 +1,4 @@
-# 3   Background
+# Background
 
 This program originated somewhere around 1986 as an MS Basic program on an Amiga 500. I was a budding programmer at the time, looking for programming ideas. I remembered an interesting looking picture in some 70's book about 'Supercomputers', with a short explanation of how the image was generated (most likely on some of the fastest hardware of the period). I couldn't find the book anymore at the time, but I decided to have a go at reproducing the kind of image as I remembered it. The resulting program worked with 32 colors only, and took about 20 minutes to generate an image of 320 x 256 pixels. Though it produced interesting looking output, it took such a long time to produce images that I eventually lost interest. I didn't even keep the source of the program when I sold the Amiga, to my later regret.
 
