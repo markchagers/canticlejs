@@ -77,7 +77,7 @@
                 cantOpts.paletteImage = bitmap;
             }
 
-            canticle = new Canticle(cantvas.value, cantOpts);
+            canticle = new Canticle(cantOpts, cantvas.value);
             canticle.getIterations((iter: number) => (iterations.value = iter));
             canticle.getPausedState((state: boolean) => {
                 pauseBtnText.value = langStore.getLangString(state ? 'Ga door' : 'Pauzeer');
@@ -110,7 +110,8 @@
                 <label for="formule" :title="langStore.getLangString('De formule waarmee gerekend wordt')">
                     {{ langStore.getLangString('Formule') }}:
                     <select name="formule" id="formule" v-model="selectedFormula">
-                        <option v-for="opt in langStore.getFormulae()" :key="opt.value" :value="opt">{{ opt.label }}</option>
+                        <option v-for="opt in langStore.getFormulae()" :key="opt.value" :value="opt">{{ opt.label }}
+                        </option>
                     </select>
                 </label>
                 <label for="stepcount" :title="langStore.getLangString('Aantal stappen (kleuren) van de berekening')">
@@ -133,10 +134,10 @@
                     <input id="checkstop" type="checkbox" v-model="stop10" />
                     {{ langStore.getLangString('Stop bij alleen 1 of 0') }}
                 </label>
-                <span :title="langStore.getLangString('Aantal gegenereerde regels')"
-                    >{{ langStore.getLangString('Iteraties') }}: {{ iterations }}</span
-                >
-                <label for="maxiterations" :title="langStore.getLangString('Maximum aantal iteraties (0 = geen limiet)')">
+                <span :title="langStore.getLangString('Aantal gegenereerde regels')">{{
+                    langStore.getLangString('Iteraties') }}: {{ iterations }}</span>
+                <label for="maxiterations"
+                    :title="langStore.getLangString('Maximum aantal iteraties (0 = geen limiet)')">
                     {{ langStore.getLangString('Max aantal iteraties') }}:
                     <input type="number" v-model="maxIterations" id="maxiterations" />
                 </label>
@@ -310,11 +311,11 @@
         mask: var(--svg);
     }
 
-    details[open] > summary::before {
+    details[open]>summary::before {
         transform: rotate(90deg);
     }
 
-    details > label {
+    details>label {
         margin: 10px 0;
     }
 
