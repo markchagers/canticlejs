@@ -1,16 +1,12 @@
 <script setup lang="ts">
     import { onMounted, ref } from 'vue';
-    import { Canticle, type ICantOptions } from '../process/canticle';
-    import { useLanguageStore } from '../store/language';
+    import { Canticle, type ICantOptions, type TColorChip } from '../process/canticle';
+    import { useLanguageStore, type TOption } from '../store/language';
     import DocViewer from './DocViewer.vue';
 
     const langStore = useLanguageStore()
-    type TOption = {
-        label: string;
-        value: number | string
-    }
 
-    const selectedFormula = ref<TOption>({ label: 'zeer fascinerend!!', value: 1 });
+    const selectedFormula = ref<TOption>({ label: 'formule 1', value: 1 });
     const selectedPalette = ref<TOption>();
 
     const gradients: TOption[] = [
@@ -23,20 +19,8 @@
         { value: '/canticle/gradients/gradient-7.png', label: 'gradient-7' },
     ];
 
-    const formulaOptions: TOption[] = [
-        { label: 'Basis formule', value: 1 },
-        { label: 'Als amiga programma', value: 2 },
-        { label: 'formule 3', value: 3 },
-        { label: 'formule 4', value: 4 },
-        { label: 'formule 5', value: 5 },
-        { label: 'formule 6', value: 6 },
-        { label: 'formule 7', value: 7 },
-        { label: 'kerstboom met kaarsjes', value: 8 },
-        { label: 'formule 9', value: 9 },
-    ];
-
     const helpvisible = ref(false);
-    const colorChips = ref<string[]>([]);
+    const colorChips = ref<TColorChip[]>([]);
     const stepCount = ref(32);
     const startCount = ref(1);
     const startRandom = ref(false);
@@ -48,7 +32,7 @@
     const maxIterations = ref(30000);
 
     onMounted(() => {
-        selectedFormula.value = formulaOptions[0];
+        selectedFormula.value = langStore.getFormulae()[0];
         selectedPalette.value = gradients[0];
     });
 
@@ -108,22 +92,23 @@
 
 <template>
     <div class="main">
-        <DocViewer :language="langStore.lang" @close="helpvisible = false" v-if="helpvisible" class="doc"></DocViewer>
+        <DocViewer v-if="helpvisible" :language="langStore.lang" @close="helpvisible = false"></DocViewer>
         <div class="sidebar">
             <h1>CanticleJS</h1>
             <div class="langbtns">
-                <button class="lang" :class="{ active: langStore.lang === 'nl' }"
-                    @click="langStore.lang = 'nl'">🇳🇱</button>
-                <button class="lang" :class="{ active: langStore.lang === 'en' }"
-                    @click="langStore.lang = 'en'">🇬🇧</button>
-                <div>{{ langStore.lang === 'nl' ? 'Nederlands' : 'English' }}</div>
+                <button class="lang" :class="{ active: langStore.lang === 'en' }" @click="langStore.lang = 'en'">🇬🇧
+                    <span>English</span>
+                </button>
+                <button class="lang" :class="{ active: langStore.lang === 'nl' }" @click="langStore.lang = 'nl'">🇳🇱
+                    <span>Nederlands</span>
+                </button>
             </div>
-            <button @click="helpvisible = true">Help</button>
+            <button @click="helpvisible = true">{{ langStore.getLangString('Wat is dit?') }}</button>
             <div class="control">
                 <label for="formule" :title="langStore.getLangString('De formule waarmee gerekend wordt')">
                     {{ langStore.getLangString('Formule') }}:
                     <select name="formule" id="formule" v-model="selectedFormula">
-                        <option v-for="opt in formulaOptions" :key="opt.value" :value="opt">{{
+                        <option v-for="opt in langStore.getFormulae()" :key="opt.value" :value="opt">{{
                             opt.label }}</option>
                     </select>
                 </label>
@@ -192,7 +177,7 @@
         <div class="canticle">
             <canvas width="1001" height="800" ref="cantvas"></canvas>
             <div class="colors">
-                <div v-for="chip in colorChips" :key="chip" :style="`background-color: ${chip};`"></div>
+                <div v-for="chip in colorChips" :key="chip.index" :style="`background-color: ${chip.color};`"></div>
             </div>
         </div>
     </div>
@@ -269,6 +254,13 @@
         border-radius: 4px;
         border: 2px solid;
         border-color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    button.lang span {
+        font-size: .8rem;
     }
 
     button.lang.active {

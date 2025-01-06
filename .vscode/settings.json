@@ -13,5 +13,8 @@
     },
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "svg.preview.background": "transparent"
+    "svg.preview.background": "transparent",
+    "[svg]": {
+        "editor.defaultFormatter": "jock.svg"
+    }
 }

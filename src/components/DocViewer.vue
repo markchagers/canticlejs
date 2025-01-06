@@ -25,7 +25,8 @@
                 {{ langStore.getLangString('Gebruiksaanwijzing') }}</div>
             <div class="btn" @click="tab = 'background'" :class="{ special: tab === 'background' }">
                 {{ langStore.getLangString('Achtergrond') }}</div>
-            <button @click="emit('close')">✖︎
+            <button class="close" @click="emit('close')">
+                <div> </div>
             </button>
         </div>
         <div class="page" v-html="result">
@@ -50,6 +51,7 @@
 
     .page {
         position: relative;
+        column-count: 2;
         background-color: var(--color-background);
         border: 1px solid var(--color-border);
         padding: 32px;
@@ -63,7 +65,8 @@
     }
 
     .page p {
-        margin-bottom: 6px;
+        line-height: 1.25rem;
+        margin-bottom: 12px;
     }
 
     .tabs {
@@ -90,5 +93,28 @@
         padding-bottom: 3px;
         margin-bottom: -1px;
         z-index: 1;
+    }
+
+    .close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+    }
+
+    .close div {
+        width: 24px;
+        height: 24px;
+        --svg: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><line x1="4" y1="4" x2="24" y2="24" stroke="currentColor" stroke-linecap="round" stroke-width="5" /><line x1="4" y1="24" x2="24" y2="4" stroke="currentColor" stroke-linecap="round" stroke-width="5" /></svg>');
+        background-color: var(--color-text);
+        mask: var(--svg);
+        mask-repeat: no-repeat;
+        margin-left: -12px;
+    }
+
+    .close:hover div {
+        background-color: var(--color-select);
     }
 </style>

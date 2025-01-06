@@ -15,6 +15,11 @@ export interface ICantOptions {
     paletteImage?: OffscreenCanvasRenderingContext2D;
 }
 
+export type TColorChip = {
+    index: number;
+    color: string;
+};
+
 export class Canticle {
     private destBitmap!: CanvasRenderingContext2D;
     private osCanvas!: OffscreenCanvas;
@@ -23,7 +28,7 @@ export class Canticle {
     private pointsCount!: number;
     private height!: number;
     private points!: number[];
-    private colors!: string[];
+    private colors!: TColorChip[];
     private options!: ICantOptions;
     private line = 0;
     private iterations = 0;
@@ -66,7 +71,7 @@ export class Canticle {
         }
 
         // blank the offscreen bitmap with CAColors[0] (the background color)
-        this.osBitmap.fillStyle = this.colors[0];
+        this.osBitmap.fillStyle = this.colors[0].color;
         this.osBitmap.fillRect(0, 0, this.width, this.height);
         // copy this to the destination image as well
         this.destBitmap.drawImage(this.osCanvas, 0, 0);
@@ -124,7 +129,7 @@ export class Canticle {
         }
     };
 
-    getColors = (): string[] => {
+    getColors = (): TColorChip[] => {
         return this.colors;
     };
 
@@ -254,7 +259,7 @@ export class Canticle {
     drawCALine = () => {
         //
         // draw a line in the backgroundcolor, so we can skip those pixels later on
-        this.osBitmap.fillStyle = this.colors[0];
+        this.osBitmap.fillStyle = this.colors[0].color;
         this.osBitmap.fillRect(0, this.line, this.width, 1);
 
         // write the current line buffer (thePoints) to the offscreen bitmap
@@ -262,7 +267,7 @@ export class Canticle {
             // draw the pixel only if it's not in the background color
             if (p > 0) {
                 const theColor = this.colors[p];
-                this.osBitmap.fillStyle = theColor;
+                this.osBitmap.fillStyle = theColor.color;
                 this.osBitmap.fillRect(i, this.line, 1, 1);
             }
         });
@@ -288,9 +293,9 @@ export class Canticle {
             }
         }
         // map the entire palette to the user selected number of colors
-        this.colors = [CABackColor];
-        for (let i = 1; i < num; i++) {
-            this.colors.push(CAColors[Math.round((i * canWidth) / num)]);
+        this.colors = [{ index: 0, color: CABackColor }];
+        for (let index = 1; index < num; index++) {
+            this.colors.push({ index, color: CAColors[Math.round((index * canWidth) / num)] });
         }
     };
 }

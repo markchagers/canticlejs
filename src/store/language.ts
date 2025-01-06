@@ -5,6 +5,7 @@ const langMap = new Map<string, string>([
     ['Wat is CanticleJS?', 'What is CanticleJS?'],
     ['Gebruiksaanwijzing', 'Manual'],
     ['Achtergrond', 'Background'],
+    ['Wat is dit?', 'What is this?'],
     ['Formule', 'Formula'],
     ['Pauzeer', 'Pause'],
     ['Ga door', 'Continue'],
@@ -33,15 +34,47 @@ const langMap = new Map<string, string>([
     ['Kies het kleurenpalet en de achtergrondkleur', 'Choose color palette and background color'],
 ]);
 
+export type TOption = {
+    label: string;
+    value: number | string;
+};
+
+const lang = ref<'nl' | 'en'>(navigator.language.startsWith('nl') ? 'nl' : 'en');
+
 export const useLanguageStore = defineStore('language', () => {
-    const userLang = navigator.language;
-    const lang = ref<'nl' | 'en'>(userLang.startsWith('nl') ? 'nl' : 'en');
+    const getFormulae = () => {
+        if (lang.value === 'en') {
+            return [
+                { label: 'formula 1', value: 1 },
+                { label: 'formula 2', value: 2 },
+                { label: 'formula 3', value: 3 },
+                { label: 'formula 4', value: 4 },
+                { label: 'formula 5', value: 5 },
+                { label: 'formula 6', value: 6 },
+                { label: 'formula 7', value: 7 },
+                { label: 'formula 3', value: 8 },
+                { label: 'formula 9', value: 9 },
+            ];
+        }
+        return [
+            { label: 'formule 1', value: 1 },
+            { label: 'formule 2', value: 2 },
+            { label: 'formule 3', value: 3 },
+            { label: 'formule 4', value: 4 },
+            { label: 'formule 5', value: 5 },
+            { label: 'formule 6', value: 6 },
+            { label: 'formule 7', value: 7 },
+            { label: 'formule 3', value: 8 },
+            { label: 'formule 9', value: 9 },
+        ];
+    };
+
     const getLangString = (key: string) => {
         if (lang.value !== 'nl') {
-            return langMap.get(key) ?? 'something';
+            return langMap.get(key) ?? `missing: ${key}`;
         }
         return key;
     };
 
-    return { lang, getLangString };
+    return { lang, getLangString, getFormulae };
 });
