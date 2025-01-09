@@ -103,7 +103,6 @@ export class Canticle {
                 this.line = 0;
             }
         }
-        this.iterations++;
         if (this.iterationCallback) {
             this.iterationCallback(this.iterations);
         }
@@ -117,6 +116,7 @@ export class Canticle {
         if (!this.paused) {
             this.frameRef = requestAnimationFrame(this.drawStep);
         }
+        this.iterations++;
     };
 
     cleanUp = () => {

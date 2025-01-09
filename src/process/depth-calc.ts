@@ -64,6 +64,6 @@ const testLevelDepth = (formule: number, levels: number, depth: number) => {
     return { formule, iterations, repeatCount, startIndex, matchIndex };
 };
 
-for (let i = 1; i <= 7; i++) {
+for (let i = 7; i <= 7; i++) {
     testFormula(i, 20000, 100);
 }

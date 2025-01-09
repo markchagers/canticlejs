@@ -35,24 +35,16 @@
                 <div> </div>
             </button>
         </div>
-        <div class="page" v-html="result"></div>
+        <div class="page-container">
+            <div class="page" v-html="result"></div>
+        </div>
     </div>
 </template>
 
 <style lang="css">
     .page {
-        position: relative;
         column-count: 2;
-        background-color: var(--color-background);
-        border: 1px solid var(--color-border);
-        padding: 32px;
-        border-radius: 6px;
-        overflow-y: scroll;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: min-content;
+        position: relative;
     }
 
     .page p {

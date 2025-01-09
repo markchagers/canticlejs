@@ -8,7 +8,7 @@
 
     const langStore = useLanguageStore();
 
-    const selectedFormula = ref<TOption>({ label: 'formule 1', value: 1 });
+    const selectedFormula = ref<TOption>({ label: 'formula 1', value: 1 });
     const selectedPalette = ref<TOption>();
 
     const gradients: TOption[] = [
@@ -96,7 +96,8 @@
 <template>
     <div class="main">
         <DocViewer v-if="helpvisible" :language="langStore.lang" @close="helpvisible = false"></DocViewer>
-        <FormulaExplorer v-if="depthvisible" @close="depthvisible = false"></FormulaExplorer>
+        <FormulaExplorer :formule="selectedFormula" v-if="depthvisible" @close="depthvisible = false">
+        </FormulaExplorer>
         <div class="sidebar">
             <h1>CanticleJS</h1>
             <div class="langbtns">
@@ -110,7 +111,6 @@
                 </button>
             </div>
             <button @click="helpvisible = true">{{ langStore.getLangString('Wat is dit?') }}</button>
-            <button @click="depthvisible = true">Explore</button>
             <div class="control">
                 <label for="formule" :title="langStore.getLangString('De formule waarmee gerekend wordt')">
                     {{ langStore.getLangString('Formule') }}:
@@ -119,8 +119,10 @@
                         </option>
                     </select>
                 </label>
-                <label for="stepcount" :title="langStore.getLangString('Aantal stappen (kleuren) van de berekening')">
-                    {{ langStore.getLangString('Stappen') }}:
+                <button @click="depthvisible = true">{{ `${langStore.getLangString('Niveaus voor')}
+                    ${selectedFormula.label}` }}</button>
+                <label for="stepcount" :title="langStore.getLangString('Aantal niveaus (kleuren) van de berekening')">
+                    {{ langStore.getLangString('Niveaus') }}:
                     <input type="number" v-model="stepCount" id="stepcount" />
                 </label>
                 <label for="startcount" :title="langStore.getLangString('Het aantal startpunten')">

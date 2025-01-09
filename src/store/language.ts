@@ -10,6 +10,7 @@ const langMap = new Map<string, string>([
     ['Pauzeer', 'Pause'],
     ['Ga door', 'Continue'],
     ['Stappen', 'Steps'],
+    ['Niveaus', 'Levels'],
     ['Aantal startpunten', 'Number of initial points'],
     ['Random positie startpunten', 'Random positions'],
     ['Scroll bij vol scherm', 'Scroll on full screen'],
@@ -25,13 +26,15 @@ const langMap = new Map<string, string>([
     ['Aantal gegenereerde regels', 'Number of lines generated'],
     ['Max aantal iteraties', 'Max iterations'],
     ['De formule waarmee gerekend wordt', 'The formula generating the image'],
-    ['Aantal stappen (kleuren) van de berekening', 'Number of steps (colors) of the calculation'],
+    ['Aantal niveaus (kleuren) van de berekening', 'Number of levels (colors) of the calculation'],
     ['Het aantal startpunten', 'The number of initial points'],
     ['Willekeurige verdeling van de startpunten', 'Random positions of initial points'],
     ['Scroll het beeld als het scherm vol is', 'Scroll the image when screen is full'],
     ['Stop als het oninteressant wordt', 'Stop when it gets boring'],
     ['Maximum aantal iteraties (0 = geen limiet)', 'Maximum iterations (0 = no limit)'],
     ['Kies het kleurenpalet en de achtergrondkleur', 'Choose color palette and background color'],
+    ['Niveaus voor', 'Levels for'],
+    ['Herhalingen', 'Repetitions'],
 ]);
 
 export type TOption = {
@@ -51,7 +54,6 @@ export const useLanguageStore = defineStore('language', () => {
                 { label: 'formula 4', value: 4 },
                 { label: 'formula 5', value: 5 },
                 { label: 'formula 6', value: 6 },
-                { label: 'formula 7', value: 7 },
             ];
         }
         return [
@@ -61,7 +63,6 @@ export const useLanguageStore = defineStore('language', () => {
             { label: 'formule 4', value: 4 },
             { label: 'formule 5', value: 5 },
             { label: 'formule 6', value: 6 },
-            { label: 'formule 7', value: 7 },
         ];
     };
 

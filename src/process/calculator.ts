@@ -34,31 +34,22 @@ export class Calculator {
             //  use the selected formula
             switch (formule) {
                 case 1:
-                    // /* Basis formule */
                     newPt = pt - 1 + 2 * Math.abs(this.getOldPoint(i - 1, edge) - this.getOldPoint(i + 1, edge));
                     break;
                 case 2:
-                    // /* lijkt op amiga programma */
                     newPt = Math.abs(pt - 1) * (1 + 2 * Math.abs(this.getOldPoint(i - 1, edge) - this.getOldPoint(i + 1, edge)));
                     break;
                 case 3:
-                    // /* wel aardig */
                     newPt = pt - 1 + this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge);
                     break;
                 case 4:
-                    // /* heel mooi */
                     newPt = Math.abs(pt - 1) + 2 * (this.getOldPoint(i - 1, edge) * this.getOldPoint(i + 1, edge));
                     break;
                 case 5:
-                    //
                     newPt = Math.abs(pt - 1) + 3 * (this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge));
                     break;
                 case 6:
                     newPt = Math.abs(pt - 1) + 2 * (this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge));
-                    break;
-                case 7:
-                    // /* wel aardig */
-                    newPt = (pt + this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge)) / 3;
                     break;
             }
 

@@ -1,6 +1,6 @@
 <script setup lang='ts'>
     import depthData from '@/assets/depth/depth-20k-100-1001.json';
-    import { computed, ref } from 'vue';
+    import { computed } from 'vue';
     import { useLanguageStore, type TOption } from '../store/language';
 
     interface depthrec {
@@ -12,40 +12,35 @@
     }
 
     const langStore = useLanguageStore();
-    const selectedFormula = ref<TOption>({ label: 'formule 1', value: 1 });
+    const emit = defineEmits(['close']);
+    const props = defineProps<{ formule: TOption }>();
     const testData: depthrec[] = depthData.map((d, i) => ({ id: `d_${i}`, ...d }));
 
     const foundData = computed(() => {
-        return testData.filter(d => d.formule === selectedFormula.value.value);
+        return testData.filter(d => d.formule === props.formule.value);
     })
 
-    const emit = defineEmits(['close']);
 </script>
 <template>
     <div class="docs">
         <div class="control">
-            <label for="formule" :title="langStore.getLangString('De formule waarmee gerekend wordt')">
-                {{ langStore.getLangString('Formule') }}:
-                <select name="formule" id="formule" v-model="selectedFormula">
-                    <option v-for="opt in langStore.getFormulae()" :key="opt.value" :value="opt">{{ opt.label }}
-                    </option>
-                </select>
-            </label>
+            <h2>{{ props.formule.label }}</h2>
             <button class="close" @click="emit('close')">
                 <div> </div>
             </button>
         </div>
-        <div class="table-container">
+        <div class="page-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Levels</th>
-                        <th>Iterations</th>
-                        <th>Herhalingen</th>
+                        <th>{{ langStore.getLangString('Niveaus') }}</th>
+                        <th>{{ langStore.getLangString('Iteraties') }}</th>
+                        <th>{{ langStore.getLangString('Herhalingen') }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="rec in foundData" :key="rec.id">
+                    <tr v-for="rec in foundData" :key="rec.id"
+                        :class="{ badvalue: rec.herhalingen > 1000 || rec.iterations < 500 }">
                         <td>{{ rec.levels }}</td>
                         <td>{{ rec.iterations }}</td>
                         <td>{{ rec.herhalingen }}</td>
@@ -60,6 +55,10 @@
         display: block;
         overflow-y: scroll;
         max-height: 75vh;
+        text-align: right;
+        padding-right: 20px;
+        margin: -16px;
+        border-collapse: collapse;
     }
 
     tbody {
@@ -71,5 +70,16 @@
         top: 0px;
         background: var(--color-background-soft);
         z-index: 1;
+        min-width: 80px;
+        padding-right: 10px;
+    }
+
+    table tbody tr.badvalue {
+        background-color: #965a5a;
+        color: white;
+    }
+
+    table tbody td {
+        padding-right: 10px;
     }
 </style>
