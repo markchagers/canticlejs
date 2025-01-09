@@ -3,6 +3,8 @@
     import { Canticle, type ICantOptions, type TColorChip } from '../process/canticle';
     import { useLanguageStore, type TOption } from '../store/language';
     import DocViewer from './DocViewer.vue';
+    import FormulaExplorer from './FormulaExplorer.vue';
+
 
     const langStore = useLanguageStore();
 
@@ -20,6 +22,7 @@
     ];
 
     const helpvisible = ref(false);
+    const depthvisible = ref(false);
     const colorChips = ref<TColorChip[]>([]);
     const stepCount = ref(32);
     const startCount = ref(1);
@@ -93,6 +96,7 @@
 <template>
     <div class="main">
         <DocViewer v-if="helpvisible" :language="langStore.lang" @close="helpvisible = false"></DocViewer>
+        <FormulaExplorer v-if="depthvisible" @close="depthvisible = false"></FormulaExplorer>
         <div class="sidebar">
             <h1>CanticleJS</h1>
             <div class="langbtns">
@@ -106,6 +110,7 @@
                 </button>
             </div>
             <button @click="helpvisible = true">{{ langStore.getLangString('Wat is dit?') }}</button>
+            <button @click="depthvisible = true">Explore</button>
             <div class="control">
                 <label for="formule" :title="langStore.getLangString('De formule waarmee gerekend wordt')">
                     {{ langStore.getLangString('Formule') }}:
@@ -198,12 +203,6 @@
         flex-flow: column nowrap;
         align-items: stretch;
         gap: 16px;
-    }
-
-    .control {
-        display: flex;
-        flex-flow: column nowrap;
-        gap: 8px;
     }
 
     .colors {

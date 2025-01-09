@@ -52,8 +52,6 @@ export const useLanguageStore = defineStore('language', () => {
                 { label: 'formula 5', value: 5 },
                 { label: 'formula 6', value: 6 },
                 { label: 'formula 7', value: 7 },
-                { label: 'formula 3', value: 8 },
-                { label: 'formula 9', value: 9 },
             ];
         }
         return [
@@ -64,8 +62,6 @@ export const useLanguageStore = defineStore('language', () => {
             { label: 'formule 5', value: 5 },
             { label: 'formule 6', value: 6 },
             { label: 'formule 7', value: 7 },
-            { label: 'formule 3', value: 8 },
-            { label: 'formule 9', value: 9 },
         ];
     };
 

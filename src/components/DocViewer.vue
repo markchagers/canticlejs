@@ -40,20 +40,6 @@
 </template>
 
 <style lang="css">
-    .docs {
-        background-color: var(--color-background-soft);
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        padding: 24px;
-        position: absolute;
-        top: 2vh;
-        bottom: 2vh;
-        left: 20vw;
-        right: 2vw;
-        margin: 0 auto 0 auto;
-        height: min-content;
-    }
-
     .page {
         position: relative;
         column-count: 2;
@@ -98,28 +84,5 @@
         padding-bottom: 3px;
         margin-bottom: -1px;
         z-index: 1;
-    }
-
-    .close {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 32px;
-        height: 32px;
-        cursor: pointer;
-    }
-
-    .close div {
-        width: 24px;
-        height: 24px;
-        --svg: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><line x1="4" y1="4" x2="24" y2="24" stroke="currentColor" stroke-linecap="round" stroke-width="5" /><line x1="4" y1="24" x2="24" y2="4" stroke="currentColor" stroke-linecap="round" stroke-width="5" /></svg>');
-        background-color: var(--color-text);
-        mask: var(--svg);
-        mask-repeat: no-repeat;
-        margin-left: -12px;
-    }
-
-    .close:hover div {
-        background-color: var(--color-select);
     }
 </style>

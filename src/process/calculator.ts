@@ -42,29 +42,21 @@ export class Calculator {
                     newPt = Math.abs(pt - 1) * (1 + 2 * Math.abs(this.getOldPoint(i - 1, edge) - this.getOldPoint(i + 1, edge)));
                     break;
                 case 3:
-                    // /* ook wel aardig */
-                    newPt = Math.abs(pt - this.getOldPoint(i - 1, edge) - 1) * Math.abs(pt - this.getOldPoint(i + 1, edge) - 1);
-                    break;
-                case 4:
                     // /* wel aardig */
                     newPt = pt - 1 + this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge);
                     break;
-                case 5:
+                case 4:
                     // /* heel mooi */
                     newPt = Math.abs(pt - 1) + 2 * (this.getOldPoint(i - 1, edge) * this.getOldPoint(i + 1, edge));
                     break;
-                case 6:
+                case 5:
                     //
                     newPt = Math.abs(pt - 1) + 3 * (this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge));
                     break;
-                case 7:
+                case 6:
                     newPt = Math.abs(pt - 1) + 2 * (this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge));
                     break;
-                case 8:
-                    // /* kerstboom met kaarsjes */
-                    newPt = 1 - pt + 2 * (this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge));
-                    break;
-                case 9:
+                case 7:
                     // /* wel aardig */
                     newPt = (pt + this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge)) / 3;
                     break;
