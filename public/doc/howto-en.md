@@ -5,11 +5,12 @@ Using CanticleJS is simple: just click the button "Start over", and CanticleJS w
 ### Formula
 
 The formula setting determines the algorithm used by CanticleJS to generate images. Choose a different algorythm from the dropdown menu and click Start over to use a different formula. Currently there are 6 different algorythms available. A page to explain these more in depth will be added later to this help. 
-Below the formula dropdown is a button "Levels for formula n". This will open a window with a table of levels that work well with the chosen formula (not all levels will produce decent results.) The levels that produce images that are repetitious or stop before 500 iterations are reached are marked in dark red.
+Below the formula dropdown is a button "Levels for formula n". This will open a window with a table of the results of running the formula with different levels (not all levels will produce decent results.). Shown are the levels, iterations and repetition count per levels setting. When a combination of formula and levels has a high repeat count, it usually meena the image is repetitive an not very interesting. All combinations have been calculated 20000 iterations deep, so you see that value a lot in the iterations column. 
+The levels that produce images that are repetitious or stop before 500 iterations are reached are marked in dark red.
 
 ### Levels
 
-Set the levels for the chosen formula here. This will also determine the number of colors for the image.
+Set the levels for the chosen formula here. This will also determine the number of colors for the image. See also under "Colors"
 
 ### Number of initial points
 
@@ -35,3 +36,4 @@ The Iterations indicator shows the number of lines (iterations) being generated.
 
 Click the 'Colors' heading to reveal more options for the colors of the image. There are a number of gradients to chose from. The colors for the image will be created from the chosen palette. The number of generated colors depends on the Levels setting above.
 Below the gradients you can choose a background color for the image. Currently the options are Black, White or Grey.
+The colors used in the image are displayed below the image area as a color bar. The first (leftmost) color is the background color. The others are taken from the selected gradient. The colors are generated before the calculation starts, and cannot be changed while it runs.
