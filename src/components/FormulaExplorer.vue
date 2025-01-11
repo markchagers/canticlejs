@@ -26,7 +26,7 @@
         <div class="control">
             <h2>{{ props.formule.label }}</h2>
             <button class="close" @click="emit('close')">
-                <div> </div>
+                <div class="closeicon"> </div>
             </button>
         </div>
         <div class="page-container">

@@ -1,10 +1,10 @@
 # Manual
 
-Using CanticleJS is simple: just click the button "Start over", and CanticleJS wil start generating your first image. You can change the settings to create different images. You have to click the start button again to apply the changed settings, they will not affect an image being rendered.
+Using CanticleJS is simple: just click the button "Start over", and CanticleJS will start generating your first image. You can change the settings to create different images. You have to click the start button again to apply the changed settings, they will not affect an image being rendered.
 
 ### Formula
 
-The formula setting determines the algorithm used by CanticleJS to generate images. Choose a different algorythm from the dropdown menu and click Start over to use a different formula. Currently there are 6 different algorythms available. A page to explain these more in depth will be added later to this help. 
+The formula setting determines the algorithm used by CanticleJS to generate images. Choose a different algorithm from the dropdown menu and click Start over to use a different formula. Currently there are 6 different algorithms available. A page to explain these more in depth will be added later to this help. 
 Below the formula dropdown is a button "Levels for formula n". This will open a window with a table of the results of running the formula with different levels (not all levels will produce decent results.). Shown are the levels, iterations and repetition count per levels setting. When a combination of formula and levels has a high repeat count, it usually meena the image is repetitive an not very interesting. All combinations have been calculated 20000 iterations deep, so you see that value a lot in the iterations column. 
 The levels that produce images that are repetitious or stop before 500 iterations are reached are marked in dark red.
 
@@ -31,6 +31,11 @@ This setting determines what happens when the formula/levels combination results
 ### (Max) Iterations
 
 The Iterations indicator shows the number of lines (iterations) being generated. The Max iterations setting determines when the algorithm will stop. A value of 0 for this setting means there is no limit (unless the previous setting is on and only 0 and 1's are generated).
+
+### Pause/Continue
+
+When a render is in progress, you can pause it with this button (to make a screenshot maybe?). The button changes to a Continue button, click it and the render will proceed. This button will also change when rendering stops through other causes.
+Sometimes when a render stops because only 0's and 1's are generated (and the setting "Stop on just 1 or 0" is on), you can click this button a few times to get the render to continue. One combination I know of is Formula 1 with Levels 123.
 
 ### Colors
 

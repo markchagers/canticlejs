@@ -18,18 +18,38 @@
     }
 }
 
+button {
+    border-radius: 5px;
+    font-size: 1rem;
+    width: fit-content;
+    padding: 5px 16px;
+    height: unset;
+}
+
 a:link {
     color: var(--color-link);
 }
 
+input[type='number'],
+select {
+    padding: 2px 6px;
+    font-size: 1rem;
+}
+
+h3 {
+    font-size: 1rem;
+    font-weight: bold;
+    break-after: avoid;
+}
+
 .docs {
-    background-color: var(--color-background-soft);
+    background-color: var(--color-background-mute);
     border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 24px;
     position: absolute;
     top: 1vh;
-    bottom: 2vh;
+    bottom: 1vh;
     left: 20vw;
     width: fit-content;
     max-height: 98vh;
@@ -49,29 +69,36 @@ a:link {
     bottom: 0;
     left: 0;
     right: 0;
-    max-height: 80vh;
+    max-height: 85vh;
 }
 
 .close {
     position: absolute;
+    background-color: var(--color-background-mute);
     top: 8px;
     right: 8px;
     width: 32px;
     height: 32px;
     cursor: pointer;
+    border: 0;
 }
 
-.close div {
-    width: 24px;
-    height: 24px;
-    --svg: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><line x1="4" y1="4" x2="24" y2="24" stroke="currentColor" stroke-linecap="round" stroke-width="5" /><line x1="4" y1="24" x2="24" y2="4" stroke="currentColor" stroke-linecap="round" stroke-width="5" /></svg>');
+.close:hover {
     background-color: var(--color-background-soft);
+}
+
+.closeicon {
+    width: 28px;
+    height: 28px;
+    --svg: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30"><line x1="4" y1="4" x2="24" y2="24" stroke="currentColor" stroke-linecap="round" stroke-width="5" /><line x1="4" y1="24" x2="24" y2="4" stroke="currentColor" stroke-linecap="round" stroke-width="5" /></svg>');
+    background-color: var(--color-text);
     mask: var(--svg);
     mask-repeat: no-repeat;
-    margin-left: -12px;
+    margin-left: -13px;
+    margin-top: -2px;
 }
 
-.close:hover div {
+.closeicon:hover {
     background-color: var(--color-select);
 }
 

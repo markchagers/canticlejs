@@ -5,7 +5,7 @@ CanticleJS is eenvoudig in het gebruik: klik "Start opnieuw", en CanticleJS begi
 ### Formule
 
 De formule instelling bepaalt welk algoritme gebruikt wordt om de beelden te genereren. Kies een algoritme uit het dropdown menu en klik Start opnieuw om het uit te proberen. Momenteel zijn er 6 algoritmes om uit te kiezen. Binnenkort komt er nog een pagina om de algoritmes nader toe te lichten.
-Onder het formule menu is een knop "Niveaus voor fomule n". Deze opent een venster met met een tabel waarin de resultaten van de gekozen formule met diverse niveaus worden weergegeven. Je ziet het aantal iteraties, en het aantal herhalingen dat een combinatie oplevert. Alleen combinaties die minstens 100 iteraties halen komen voor in de lijst. Als een combinatie een hoog aantal herhalingen oplevert betekent dat dat het beeld zich snel herhaalt, meestal minder interessant. Alle combinaties zijn met maximaal 20000 iteraties doorgerekend, dus veel combinaties hebben deze waarde in de kolom iteraties. Niveaus die veel herhaling hebben, of minder dan 500 iteraties halen zijn rood gemarkeerd in de lijst.
+Onder het formule menu zie je een knop "Niveaus voor fomule n". Deze opent een venster met met een tabel waarin de resultaten van de gekozen formule met diverse niveaus worden weergegeven. Je ziet de levels, het aantal iteraties en het aantal herhalingen dat een combinatie oplevert. Alleen combinaties die minstens 100 iteraties halen komen voor in de lijst. Als een combinatie een hoog aantal herhalingen oplevert betekent dat dat het beeld zich snel herhaalt, meestal minder interessant. Alle combinaties zijn tot maximaal 20000 iteraties doorgerekend, dus veel combinaties hebben deze waarde in de kolom iteraties. Niveaus die veel herhaling hebben, of minder dan 500 iteraties halen zijn rood gemarkeerd in de lijst.
 
 ### Niveaus
 
@@ -30,6 +30,11 @@ Dit bepaalt wat er gebeurt als de combinatie van formule en niveaus alleen waard
 ### (Max aantal) Iteraties
 
 Het aantal iteraties wordt lopend weergegeven bij "Iteraties:", De instelling "Max aantal iteraties" bepaalt wanneer de berekening stopt. Stel dit in op 0 om oneindig door te laten rekenen. (tenzij de bovenstaande instelling aan staat en er alleen 0 and 1's gegenereerd worden).
+
+### Pauzeer/Ga door
+
+Als een beeld gerenderd wordt kun je de voortgang pauzeren met deze knop, Die verandert dan in een "Ga door" knop, klik die en het renderen gaat verder. Deze knop verandert ook in een Ga door knop als het genereren stopt om andere redenen.
+Soms, als een render stopt omdat er alleen 0 en 1 gegenereerd wordt (en de instelling "Stop bij alleen 1 of 0" is aan) kun je de render weer op gang brengen door een paar maal op deze knop te klikken. Een combinatie waar dat gebeurt is Formule 1 met Niveaus 123.
 
 ### Kleuren
 

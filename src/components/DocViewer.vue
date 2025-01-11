@@ -32,7 +32,7 @@
                 {{ langStore.getLangString('Achtergrond') }}
             </div>
             <button class="close" @click="emit('close')">
-                <div> </div>
+                <div class="closeicon"> </div>
             </button>
         </div>
         <div class="page-container">

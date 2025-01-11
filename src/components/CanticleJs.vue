@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { onMounted, ref } from 'vue';
+    import { onMounted, ref, watch } from 'vue';
     import { Canticle, type ICantOptions, type TColorChip } from '../process/canticle';
     import { useLanguageStore, type TOption } from '../store/language';
     import DocViewer from './DocViewer.vue';
@@ -35,9 +35,23 @@
     const maxIterations = ref(30000);
 
     onMounted(() => {
-        selectedFormula.value = langStore.getFormulae()[0];
         selectedPalette.value = gradients[0];
+        setTimeout(() => {
+            start();
+        }, 100);
     });
+
+    watch(
+        () => langStore.lang,
+        () => {
+            const val = selectedFormula.value.value
+            const menu = langStore.getFormulae();
+            const newVal = menu.find(m => m.value === val) ?? menu[0];
+            selectedFormula.value = newVal
+        },
+        { immediate: true }
+    )
+
 
     const pauseResume = () => {
         canticle?.pauseResume();
@@ -204,7 +218,9 @@
         display: flex;
         flex-flow: column nowrap;
         align-items: stretch;
+        height: 100vh;
         gap: 16px;
+        background-color: var(--color-background-soft);
     }
 
     .colors {
@@ -226,12 +242,6 @@
 
     input[type='number'] {
         width: 60px;
-    }
-
-    button {
-        height: 24px;
-        width: fit-content;
-        padding: 0 16px;
     }
 
     .langbtns {
