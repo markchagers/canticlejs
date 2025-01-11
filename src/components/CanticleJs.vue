@@ -89,7 +89,7 @@
             const bitmap = cv.getContext('2d');
             if (bitmap) {
                 const image = document.createElement('img');
-                image.src = (selectedPalette.value?.value as string) ?? 'gradient-1';
+                image.src = (selectedPalette.value?.value as string) ?? '/canticle/gradients/gradient-1.png';
                 bitmap.drawImage(image, 0, 0);
                 cantOpts.paletteImage = bitmap;
             }
@@ -160,7 +160,7 @@
                 <label for="maxiterations"
                     :title="langStore.getLangString('Maximum aantal iteraties (0 = geen limiet)')">
                     {{ langStore.getLangString('Max aantal iteraties') }}:
-                    <input type="number" v-model="maxIterations" id="maxiterations" />
+                    <input type="number" class="long" v-model="maxIterations" id="maxiterations" />
                 </label>
                 <button :disabled="!started" @click="pauseResume()">{{ pauseBtnText }}</button>
             </div>
@@ -242,6 +242,10 @@
 
     input[type='number'] {
         width: 60px;
+    }
+
+    input[type='number'].long {
+        width: 100px;
     }
 
     .langbtns {
