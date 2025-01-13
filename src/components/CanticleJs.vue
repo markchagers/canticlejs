@@ -5,9 +5,7 @@
     import DocViewer from './DocViewer.vue';
     import FormulaExplorer from './FormulaExplorer.vue';
 
-
     const langStore = useLanguageStore();
-
     const selectedFormula = ref<TOption>({ label: 'formula 1', value: 1 });
     const selectedPalette = ref<TOption>();
 
@@ -33,12 +31,13 @@
     const pauseBtnText = ref(langStore.getLangString('Pauzeer'));
     const started = ref(false);
     const maxIterations = ref(30000);
+    const iterations = ref<number>(0);
+    const cantvas = ref<HTMLCanvasElement>();
+    let canticle: Canticle | null;
 
     onMounted(() => {
         selectedPalette.value = gradients[0];
-        setTimeout(() => {
-            start();
-        }, 100);
+        start();
     });
 
     watch(
@@ -52,7 +51,6 @@
         { immediate: true }
     )
 
-
     const pauseResume = () => {
         canticle?.pauseResume();
     };
@@ -63,15 +61,20 @@
         colorChips.value = [];
     };
 
-    const iterations = ref<number>(0);
-
-    let canticle: Canticle | null;
-
-    const cantvas = ref<HTMLCanvasElement>();
     const start = () => {
         cleanUp();
         const selected = selectedFormula.value;
-        if (cantvas.value && selected) {
+        if (!cantvas.value || !selected) {
+            return;
+        }
+        const cv = new OffscreenCanvas(512, 4);
+        const bitmap = cv.getContext('2d');
+        if (!bitmap) {
+            return;
+        }
+        const image = document.createElement('img');
+        image.onload = () => {
+            bitmap.drawImage(image, 0, 0);
             const cantOpts: ICantOptions = {
                 background: bgColor.value,
                 formule: selected.value as number,
@@ -84,15 +87,8 @@
                 initNumber: startCount.value,
                 stopOn10: stop10.value,
                 scrolling: scrolling.value,
+                paletteImage: bitmap
             };
-            const cv = new OffscreenCanvas(512, 4);
-            const bitmap = cv.getContext('2d');
-            if (bitmap) {
-                const image = document.createElement('img');
-                image.src = (selectedPalette.value?.value as string) ?? '/canticle/gradients/gradient-1.png';
-                bitmap.drawImage(image, 0, 0);
-                cantOpts.paletteImage = bitmap;
-            }
 
             canticle = new Canticle(cantOpts, cantvas.value);
             canticle.getIterations((iter: number) => (iterations.value = iter));
@@ -104,6 +100,7 @@
             started.value = true;
             pauseBtnText.value = langStore.getLangString('Pauzeer');
         }
+        image.src = (selectedPalette.value?.value as string) ?? '/canticle/gradients/gradient-1.png';
     };
 </script>
 
@@ -308,6 +305,14 @@
         background-color: var(--color-background-soft);
     }
 
+    .accordion-item__title::marker {
+        content: "";
+    }
+
+    summary::-webkit-details-marker {
+        display: none;
+    }
+
     summary {
         cursor: pointer;
         display: flex;
@@ -332,10 +337,6 @@
 
     details>label {
         margin: 10px 0;
-    }
-
-    canvas {
-        background-color: black;
     }
 
     .gradient {

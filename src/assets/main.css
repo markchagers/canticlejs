@@ -31,10 +31,18 @@ a:link {
     color: var(--color-link);
 }
 
-input[type='number'],
-select {
+input[type='number'] {
     padding: 2px 6px;
     font-size: 1rem;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding: 4px 10px;
+    font-size: 1rem;
+    border-radius: 4px;
 }
 
 h3 {
