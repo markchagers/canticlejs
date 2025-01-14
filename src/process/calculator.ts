@@ -1,3 +1,5 @@
+import type { IFormula } from './formula';
+
 export interface ICalculatorOptions {
     width: number;
     levels: number;
@@ -5,6 +7,7 @@ export interface ICalculatorOptions {
     minOverflow: number;
     pointsCount: number;
     initPoints: 'random' | 'regular';
+    edge: 'transparent' | 'opaque' | 'reflect';
 }
 
 export class Calculator {
@@ -27,31 +30,11 @@ export class Calculator {
         }
     };
 
-    newCALine = (formule: number, edge: 'transparent' | 'opaque' | 'reflect'): number[] => {
+    newCALine = (formule: IFormula): number[] => {
         //   this calculates a new line from the values in points
         const newPoints = this.points.map((pt, i) => {
-            let newPt = 0;
             //  use the selected formula
-            switch (formule) {
-                case 1:
-                    newPt = pt - 1 + 2 * Math.abs(this.getOldPoint(i - 1, edge) - this.getOldPoint(i + 1, edge));
-                    break;
-                case 2:
-                    newPt = Math.abs(pt - 1) * (1 + 2 * Math.abs(this.getOldPoint(i - 1, edge) - this.getOldPoint(i + 1, edge)));
-                    break;
-                case 3:
-                    newPt = pt - 1 + this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge);
-                    break;
-                case 4:
-                    newPt = Math.abs(pt - 1) + 2 * (this.getOldPoint(i - 1, edge) * this.getOldPoint(i + 1, edge));
-                    break;
-                case 5:
-                    newPt = Math.abs(pt - 1) + 3 * (this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge));
-                    break;
-                case 6:
-                    newPt = Math.abs(pt - 1) + 2 * (this.getOldPoint(i - 1, edge) + this.getOldPoint(i + 1, edge));
-                    break;
-            }
+            let newPt = formule.formula(pt, this.getOldPoint(i - 1), this.getOldPoint(i + 1));
 
             // bounds checking and appropriate action on over- or underflow
             if (newPt > this.options.levels - 1) {
@@ -97,12 +80,12 @@ export class Calculator {
         return newPoints;
     };
 
-    private getOldPoint = (index: number, edge: 'transparent' | 'opaque' | 'reflect' = 'reflect') => {
+    private getOldPoint = (index: number) => {
         // this function is used by newCALine, it returns the oldPoint[index],
         // unless index is out of bounds: index > the number of points or index < 0
         // the value returned then is determined by the uncommented lines below
         if (index < 0) {
-            switch (edge) {
+            switch (this.options.edge) {
                 case 'transparent':
                     return 0;
                 case 'opaque':
@@ -111,7 +94,7 @@ export class Calculator {
                     return this.points[1];
             }
         } else if (index > this.points.length - 1) {
-            switch (edge) {
+            switch (this.options.edge) {
                 case 'transparent':
                     return 0;
                 case 'opaque':

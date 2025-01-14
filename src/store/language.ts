@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { initFormulae } from '../process/formula';
 
 const langMap = new Map<string, string>([
     ['Wat is CanticleJS?', 'What is CanticleJS?'],
@@ -7,6 +8,7 @@ const langMap = new Map<string, string>([
     ['Achtergrond', 'Background'],
     ['Wat is dit?', 'What is this?'],
     ['Formule', 'Formula'],
+    ['formule', 'formula'],
     ['Pauzeer', 'Pause'],
     ['Ga door', 'Continue'],
     ['Stappen', 'Steps'],
@@ -44,34 +46,38 @@ export type TOption = {
 
 const lang = ref<'nl' | 'en'>(navigator.language.startsWith('nl') ? 'nl' : 'en');
 
+const getLangString = (key: string) => {
+    if (lang.value !== 'nl') {
+        if (`${parseFloat(key)}` === key) {
+            return key;
+        }
+        return langMap.get(key) ?? `missing: ${key}`;
+    }
+    return key;
+};
+
+const translate = (s: string) => {
+    const words = s.split(' ');
+    return words.map(w => getLangString(w)).join(' ');
+};
+
+const getFormulaByValue = (value: number) => {
+    const form = initFormulae();
+    const formul = form.find(f => f.value === value) ?? form[0];
+    if (lang.value === 'en') {
+        formul.label = translate(formul.label);
+    }
+    return formul;
+};
+
 export const useLanguageStore = defineStore('language', () => {
     const getFormulae = () => {
+        const form = initFormulae();
         if (lang.value === 'en') {
-            return [
-                { label: 'formula 1', value: 1 },
-                { label: 'formula 2', value: 2 },
-                { label: 'formula 3', value: 3 },
-                { label: 'formula 4', value: 4 },
-                { label: 'formula 5', value: 5 },
-                { label: 'formula 6', value: 6 },
-            ];
+            form.forEach(f => (f.label = translate(f.label)));
         }
-        return [
-            { label: 'formule 1', value: 1 },
-            { label: 'formule 2', value: 2 },
-            { label: 'formule 3', value: 3 },
-            { label: 'formule 4', value: 4 },
-            { label: 'formule 5', value: 5 },
-            { label: 'formule 6', value: 6 },
-        ];
+        return form;
     };
 
-    const getLangString = (key: string) => {
-        if (lang.value !== 'nl') {
-            return langMap.get(key) ?? `missing: ${key}`;
-        }
-        return key;
-    };
-
-    return { lang, getLangString, getFormulae };
+    return { lang, getLangString, getFormulae, getFormulaByValue };
 });

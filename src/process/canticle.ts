@@ -1,10 +1,11 @@
 // set some other properties
 
 import { Calculator, type ICalculatorOptions } from './calculator';
+import type { IFormula } from './formula';
 
 export interface ICantOptions {
     background: string;
-    formule: number;
+    formule: IFormula;
     levels: number;
     maxIterations: number;
     maxOverflow: number;
@@ -70,6 +71,7 @@ export class Canticle {
             minOverflow: this.options.minOverflow,
             pointsCount: this.options.initNumber,
             initPoints: this.options.initPoints,
+            edge: this.options.edgeBehavior,
         };
         this.calculator = new Calculator();
         this.calculator.setupCALine(calcOpts);
@@ -84,7 +86,7 @@ export class Canticle {
     };
 
     drawStep = () => {
-        this.points = this.calculator.newCALine(this.options.formule, this.options.edgeBehavior);
+        this.points = this.calculator.newCALine(this.options.formule);
         this.drawCALine();
         // blit the offscreen bitmap to the canvas
         this.destBitmap?.drawImage(this.osCanvas, 0, 0);

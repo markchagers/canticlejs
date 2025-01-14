@@ -1,12 +1,13 @@
 <script setup lang="ts">
     import { onMounted, ref, watch } from 'vue';
     import { Canticle, type ICantOptions, type TColorChip } from '../process/canticle';
+    import type { IFormula } from '../process/formula';
     import { useLanguageStore, type TOption } from '../store/language';
     import DocViewer from './DocViewer.vue';
     import FormulaExplorer from './FormulaExplorer.vue';
 
     const langStore = useLanguageStore();
-    const selectedFormula = ref<TOption>({ label: 'formula 1', value: 1 });
+    const selectedFormula = ref<IFormula>();
     const selectedPalette = ref<TOption>();
 
     const gradients: TOption[] = [
@@ -36,6 +37,7 @@
     let canticle: Canticle | null;
 
     onMounted(() => {
+        selectedFormula.value = langStore.getFormulaByValue(0);
         selectedPalette.value = gradients[0];
         start();
     });
@@ -43,9 +45,9 @@
     watch(
         () => langStore.lang,
         () => {
-            const val = selectedFormula.value.value
+            const val = selectedFormula.value
             const menu = langStore.getFormulae();
-            const newVal = menu.find(m => m.value === val) ?? menu[0];
+            const newVal = menu.find(m => m.value === val?.value) ?? menu[0];
             selectedFormula.value = newVal
         },
         { immediate: true }
@@ -77,7 +79,7 @@
             bitmap.drawImage(image, 0, 0);
             const cantOpts: ICantOptions = {
                 background: bgColor.value,
-                formule: selected.value as number,
+                formule: selected,
                 levels: stepCount.value,
                 maxIterations: maxIterations.value,
                 maxOverflow: 1,
@@ -131,7 +133,7 @@
                     </select>
                 </label>
                 <button @click="depthvisible = true">{{ `${langStore.getLangString('Niveaus voor')}
-                    ${selectedFormula.label}` }}</button>
+                    ${selectedFormula?.label}` }}</button>
                 <label for="stepcount" :title="langStore.getLangString('Aantal niveaus (kleuren) van de berekening')">
                     {{ langStore.getLangString('Niveaus') }}:
                     <input type="number" v-model="stepCount" id="stepcount" />

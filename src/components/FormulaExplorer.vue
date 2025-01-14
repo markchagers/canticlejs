@@ -1,7 +1,8 @@
 <script setup lang='ts'>
     import depthData from '@/assets/depth/depth-20k-100-1001.json';
     import { computed } from 'vue';
-    import { useLanguageStore, type TOption } from '../store/language';
+    import type { IFormula } from '../process/formula';
+    import { useLanguageStore } from '../store/language';
 
     interface depthrec {
         id: string;
@@ -13,18 +14,22 @@
 
     const langStore = useLanguageStore();
     const emit = defineEmits(['close']);
-    const props = defineProps<{ formule: TOption }>();
+    const props = defineProps<{ formule?: IFormula }>();
     const testData: depthrec[] = depthData.map((d, i) => ({ id: `d_${i}`, ...d }));
 
     const foundData = computed(() => {
-        return testData.filter(d => d.formule === props.formule.value);
+        if (props.formule) {
+            const form = props.formule.value ?? 1
+            return testData.filter(d => d.formule === form);
+        }
+        return [];
     })
 
 </script>
 <template>
     <div class="docs">
         <div class="control">
-            <h2>{{ props.formule.label }}</h2>
+            <h2>{{ props.formule?.label ?? '' }}</h2>
             <button class="close" @click="emit('close')">
                 <div class="closeicon"> </div>
             </button>

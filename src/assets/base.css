@@ -35,6 +35,7 @@
 
     --color-select: #1fa4fc;
     --color-link: #006eb7;
+    --color-link-mute: #5200aa;
     --section-gap: 160px;
 }
 
@@ -51,6 +52,7 @@
         --color-text: var(--vt-c-text-dark-2);
         --color-select: #0065a8;
         --color-link: #54b9fcd1;
+        --color-link-mute: #3fffe5;
     }
 }
 
