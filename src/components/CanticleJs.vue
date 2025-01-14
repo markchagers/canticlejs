@@ -79,7 +79,7 @@
         image.onload = () => {
             bitmap.drawImage(image, 0, 0);
             const cantOpts: ICantOptions = {
-                background: bgColor.value,
+                background: () => bgColor.value,
                 formule: selected,
                 levels: stepCount.value,
                 maxIterations: () => maxIterations.value,
@@ -154,17 +154,19 @@
                     {{ langStore.getLangString('Random positie startpunten') }}
                 </label>
                 <label for="checkscroll" :title="langStore.getLangString('Scroll het beeld als het scherm vol is')">
-                    <input id="checkscroll" type="checkbox" v-model="scrolling" />
+                    <input id="checkscroll" type="checkbox" v-model="scrolling" /><span class="icon"><span
+                            class="icon">📍</span></span>
                     {{ langStore.getLangString('Scroll bij vol scherm') }}
                 </label>
                 <label for="checkstop" :title="langStore.getLangString('Stop als het oninteressant wordt')">
-                    <input id="checkstop" type="checkbox" v-model="stop10" />
+                    <input id="checkstop" type="checkbox" v-model="stop10" /><span class="icon">📍</span>
                     {{ langStore.getLangString('Stop bij alleen 1 of 0') }}
                 </label>
                 <span :title="langStore.getLangString('Aantal gegenereerde regels')">{{
                     langStore.getLangString('Iteraties') }}: {{ iterations }}</span>
                 <label for="maxiterations"
-                    :title="langStore.getLangString('Maximum aantal iteraties (0 = geen limiet)')">
+                    :title="langStore.getLangString('Maximum aantal iteraties (0 = geen limiet)')"><span
+                        class="icon">📍</span>
                     {{ langStore.getLangString('Max aantal iteraties') }}:
                     <input type="number" class="long" v-model="maxIterations" id="maxiterations" />
                 </label>
@@ -179,7 +181,7 @@
                         <input type="radio" name="gradient" v-model="selectedPalette" :value="grad" :id="grad.label" />
                         <div class="gradient" :style="{ 'background-image': 'url(' + grad.value + ')' }"></div>
                     </label>
-                    <span>{{ langStore.getLangString('Achtergrondkleur') }}:</span>
+                    <span><span class="icon">📍</span> {{ langStore.getLangString('Achtergrondkleur') }}:</span>
                     <label>
                         <label for="zwart">
                             <input type="radio" name="background" v-model="bgColor" value="#000" id="zwart" />

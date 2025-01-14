@@ -4,7 +4,7 @@ import { Calculator, type ICalculatorOptions } from './calculator';
 import type { IFormula } from './formula';
 
 export interface ICantOptions {
-    background: string;
+    background: () => string;
     formule: IFormula;
     levels: number;
     maxIterations: () => number;
@@ -58,7 +58,7 @@ export class Canticle {
                 this.pointsCount = this.options.initNumber;
                 this.points = [];
                 // initialise display colors
-                this.initColors(this.options.background ?? '#000', this.options.levels);
+                this.initColors(this.options.background() ?? '#000', this.options.levels);
             }
         }
     }
@@ -154,7 +154,7 @@ export class Canticle {
     drawCALine = () => {
         //
         // draw a line in the backgroundcolor, so we can skip those pixels later on
-        this.osBitmap.fillStyle = this.colors[0].color;
+        this.osBitmap.fillStyle = this.options.background();
         this.osBitmap.fillRect(0, this.line, this.width, 1);
 
         // write the current line buffer (thePoints) to the offscreen bitmap
