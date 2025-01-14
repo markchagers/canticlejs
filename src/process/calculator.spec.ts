@@ -1,6 +1,8 @@
 import { expect, test } from 'vitest';
 import { Calculator, type ICalculatorOptions } from './calculator';
+import { initFormulae } from './formula';
 
+const formulae = initFormulae();
 test('init', () => {
     const options: ICalculatorOptions = {
         levels: 32,
@@ -9,11 +11,12 @@ test('init', () => {
         initPoints: 'regular',
         pointsCount: 1,
         width: 100,
+        edge: 'transparent',
     };
 
     const sut = new Calculator();
     sut.setupCALine(options);
-    const newPoints = sut.newCALine(1, 'transparent');
+    const newPoints = sut.newCALine(formulae[1]);
     expect(newPoints.length).toBe(100);
     expect(Math.max(...newPoints)).toBeGreaterThan(10);
 });
@@ -26,6 +29,7 @@ test('calcDepth', () => {
         initPoints: 'regular',
         pointsCount: 1,
         width: 1001,
+        edge: 'transparent',
     };
 
     const sut = new Calculator();
@@ -33,7 +37,7 @@ test('calcDepth', () => {
 
     let iter = 0;
     for (let i = 0; i < 10000; i++) {
-        const newPoints = sut.newCALine(1, 'transparent');
+        const newPoints = sut.newCALine(formulae[1]);
         const max = Math.max(...newPoints);
         if (max <= 0) {
             break;

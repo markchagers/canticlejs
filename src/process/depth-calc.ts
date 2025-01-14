@@ -1,6 +1,7 @@
 import { Calculator, type ICalculatorOptions } from './calculator.ts';
+import { initFormulae, type IFormula } from './formula.ts';
 
-const testFormula = (formule: number, depth: number, minDepth: number) => {
+const testFormula = (formule: IFormula, depth: number, minDepth: number) => {
     for (let i = 0; i < 256; i++) {
         const res = testLevelDepth(formule, i, depth);
         if (res.iterations > minDepth) {
@@ -9,7 +10,7 @@ const testFormula = (formule: number, depth: number, minDepth: number) => {
     }
 };
 
-const testLevelDepth = (formule: number, levels: number, depth: number) => {
+const testLevelDepth = (formule: IFormula, levels: number, depth: number) => {
     const options: ICalculatorOptions = {
         levels,
         maxOverflow: 1,
@@ -17,6 +18,7 @@ const testLevelDepth = (formule: number, levels: number, depth: number) => {
         initPoints: 'regular',
         pointsCount: 1,
         width: 1001,
+        edge: 'transparent',
     };
 
     const repeatLines: string[] = [];
@@ -52,7 +54,7 @@ const testLevelDepth = (formule: number, levels: number, depth: number) => {
     let iterations = 0;
 
     for (let i = 0; i <= depth; i++) {
-        const newPoints = sut.newCALine(formule, 'transparent');
+        const newPoints = sut.newCALine(formule);
         const thisLine = newPoints.join('|').toString();
         checkRepeat(i, thisLine);
         const max = Math.max(...newPoints);
@@ -64,6 +66,7 @@ const testLevelDepth = (formule: number, levels: number, depth: number) => {
     return { formule, iterations, repeatCount, startIndex, matchIndex };
 };
 
-for (let i = 7; i <= 7; i++) {
-    testFormula(i, 20000, 100);
-}
+const formulae = initFormulae();
+formulae.forEach(f => {
+    testFormula(f, 20000, 100);
+});
