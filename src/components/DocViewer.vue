@@ -5,7 +5,7 @@
 
     const langStore = useLanguageStore();
     const props = defineProps<{ language: 'nl' | 'en' }>();
-    type content = 'howto' | 'whatis' | 'background';
+    type content = 'howto' | 'whatis' | 'background' | 'formule';
     const tab = ref<content>('whatis');
     const result = ref('');
     watchEffect(async () => {
@@ -30,6 +30,9 @@
             </div>
             <div class="btn" @click="tab = 'background'" :class="{ special: tab === 'background' }">
                 {{ langStore.getLangString('Achtergrond') }}
+            </div>
+            <div class="btn" @click="tab = 'formule'" :class="{ special: tab === 'formule' }">
+                {{ langStore.getLangString('Formule') }}
             </div>
             <button class="close" @click="emit('close')">
                 <div class="closeicon"> </div>
