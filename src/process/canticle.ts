@@ -7,14 +7,14 @@ export interface ICantOptions {
     background: string;
     formule: IFormula;
     levels: number;
-    maxIterations: number;
+    maxIterations: () => number;
     maxOverflow: number;
     minOverflow: number;
     edgeBehavior: 'transparent' | 'opaque' | 'reflect';
     initPoints: 'random' | 'regular';
     initNumber: number;
-    stopOn10: boolean;
-    scrolling: boolean;
+    stopOn10: () => boolean;
+    scrolling: () => boolean;
     paletteImage?: OffscreenCanvasRenderingContext2D;
 }
 
@@ -96,7 +96,7 @@ export class Canticle {
         } else {
             // image full
             // if scrolling is on then scroll the current image up
-            if (this.options.scrolling) {
+            if (this.options.scrolling()) {
                 // blit full image to screen
                 this.destBitmap.drawImage(this.osCanvas, 0, 0);
                 // shift offscreen image up
@@ -110,8 +110,8 @@ export class Canticle {
         }
         this.paused =
             this.paused ||
-            (this.options.stopOn10 && Math.max(...this.points) < 2) ||
-            (this.options.maxIterations > 0 && this.iterations >= this.options.maxIterations);
+            (this.options.stopOn10() && Math.max(...this.points) < 2) ||
+            (this.options.maxIterations() > 0 && this.iterations >= this.options.maxIterations());
         if (this.pausedCallback) {
             this.pausedCallback(this.paused);
         }

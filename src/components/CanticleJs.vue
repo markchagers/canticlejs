@@ -20,6 +20,7 @@
         { value: '/canticle/gradients/gradient-7.png', label: 'gradient-7' },
     ];
 
+    const colorarea = ref<HTMLDetailsElement>();
     const helpvisible = ref(false);
     const depthvisible = ref(false);
     const colorChips = ref<TColorChip[]>([]);
@@ -81,14 +82,14 @@
                 background: bgColor.value,
                 formule: selected,
                 levels: stepCount.value,
-                maxIterations: maxIterations.value,
+                maxIterations: () => maxIterations.value,
                 maxOverflow: 1,
                 minOverflow: 1,
                 edgeBehavior: 'transparent',
                 initPoints: startRandom.value ? 'random' : 'regular',
                 initNumber: startCount.value,
-                stopOn10: stop10.value,
-                scrolling: scrolling.value,
+                stopOn10: () => stop10.value,
+                scrolling: () => scrolling.value,
                 paletteImage: bitmap
             };
 
@@ -104,10 +105,16 @@
         }
         image.src = (selectedPalette.value?.value as string) ?? '/canticle/gradients/gradient-1.png';
     };
+
+    const closeColors = () => {
+        if (colorarea.value) {
+            colorarea.value.open = false
+        }
+    }
 </script>
 
 <template>
-    <div class="main">
+    <div class="main" v-on:click="closeColors()">
         <DocViewer v-if="helpvisible" :language="langStore.lang" @close="helpvisible = false"></DocViewer>
         <FormulaExplorer :formule="selectedFormula" v-if="depthvisible" @close="depthvisible = false">
         </FormulaExplorer>
@@ -163,7 +170,7 @@
                 </label>
                 <button :disabled="!started" @click="pauseResume()">{{ pauseBtnText }}</button>
             </div>
-            <details>
+            <details ref="colorarea" @click.stop="undefined">
                 <summary>{{ langStore.getLangString('Kleuren') }}:</summary>
                 <span>{{ langStore.getLangString('Palet') }}:</span>
 
