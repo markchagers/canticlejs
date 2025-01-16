@@ -4,6 +4,8 @@
 
 CanticleJS is the latest incarnation of a program to experiment with the phenomenon named Cellular Automatons. Basically all you can do with it is generate interesting images.
 
+You can see how it works on my [personal site](https://marksman-do.nl/canticle/)
+
 Read more about this in [the docs](/public/doc/whatis-en.md), [the manual](/dist/doc/howto-en.md) and some [background](/public/doc/background-en.md).
 
 CanticleJS was developed with Vue and Vite (see below), but the imaging code is all just vanilla typescript, so it should be easy to use it in other environments.

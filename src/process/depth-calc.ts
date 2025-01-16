@@ -18,7 +18,7 @@ const testLevelDepth = (formule: IFormula, levels: number, depth: number) => {
         initPoints: 'regular',
         pointsCount: 1,
         width: 1001,
-        edge: 'transparent',
+        edge: () => 'transparent',
     };
 
     const repeatLines: string[] = [];
