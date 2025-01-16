@@ -2,6 +2,8 @@
 
 CanticleJS is eenvoudig in het gebruik: klik de knop "Start opnieuw", en CanticleJS begint een nieuwe afbeelding te genereren. Pas de instellingen aan om andere beelden te maken. Je moet de start knop opnieuw aanklikken om nieuwe instellingen zoals aantal startpunten en niveaus te gebruiken, die hebben geen invloed op de afbeelding die in ontwikkeling is. Een aantal instellingen werken wel direct op de afbeelding in ontwikkeling, deze zijn met een <span class="icon">📍</span> icoon gemarkeerd.
 
+Alle instellingen die je aanpast worden automatisch bewaard (op je eigen computer). De volgende keer dat je CanticleJS opent zijn de zelfde instellingen weer actief.
+
 ### Formule
 
 De formule instelling bepaalt welk algoritme gebruikt wordt om de beelden te genereren. Kies een algoritme uit het dropdown menu en klik Start opnieuw om het uit te proberen. Momenteel zijn er 6 algoritmes om uit te kiezen. Zie onder de tab "Formule voor een toelichting op deze formules".

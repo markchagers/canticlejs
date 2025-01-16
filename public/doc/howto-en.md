@@ -2,6 +2,8 @@
 
 Using CanticleJS is simple: just click the button "Start over", and CanticleJS will start generating a fresh image. You can change the settings to create different images. You have to click the start button again to apply changed settings such as starting points and levels, they will not affect an image being rendered. Some other properties do affest the image being rendered, these are marked with a <span class="icon">📍</span> icon.
 
+All settings are stored automatically (on your own computer). The next time you open CanticleJS the same settings will be active.
+
 ### Formula
 
 The formula setting determines the algorithm used by CanticleJS to generate images. Choose a different algorithm from the dropdown menu and click Start over to use a different formula. Currently there are 6 different algorithms available. See under the tab "Formula" for an explanation. 

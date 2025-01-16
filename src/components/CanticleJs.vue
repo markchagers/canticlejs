@@ -239,7 +239,7 @@
         flex-flow: column nowrap;
         align-items: stretch;
         gap: 8px;
-        border-bottom: 1px solid #ccc;
+        border-bottom: 1px solid var(--color-border);
     }
 
     .sidebar-section-fixed .control {

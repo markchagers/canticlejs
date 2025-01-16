@@ -51,8 +51,8 @@
         --color-heading: var(--vt-c-text-dark-1);
         --color-text: var(--vt-c-text-dark-2);
         --color-select: #0065a8;
-        --color-link: #54b9fcd1;
-        --color-link-mute: #3fffe5;
+        --color-link: #57a4fdd1;
+        --color-link-mute: #7570fdd1;
     }
 }
 
