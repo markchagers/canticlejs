@@ -205,6 +205,12 @@
                             </label>
                         </div>
                     </details>
+                    <div class="control">
+                        <a href="https://github.com/markchagers/canticlejs" target="_blank">
+                            CanticleJS on GitHub
+                            <i class="fab fa-github" style="font-size: 48px;"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
