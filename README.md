@@ -1,10 +1,17 @@
 # CanticleJS
 
-This template should help get you started developing with Vue 3 in Vite.
+## What is CanticleJS?
+
+CanticleJS is the latest incarnation of a program to experiment with the phenomenon named Cellular Automatons. Basically all you can do with it is generate interesting images.
+
+Read more about this in [the docs](/public/doc/whatis-en.md), [the manual](/dist/doc/howto-en.md) and some [background](/public/doc/background-en.md).
+
+CanticleJS was developed with Vue and Vite (see below), but the imaging code is all just vanilla typescript, so it should be easy to use it in other environments.
 
 ## Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+Alternatively you may prefer [VSCodium](https://vscodium.com) which is functionally equivalent, but less MicroSofty.
 
 ## Type Support for `.vue` Imports in TS
 
