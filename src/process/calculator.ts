@@ -1,3 +1,4 @@
+import type { TEdgeOps } from './canticle';
 import type { IFormula } from './formula';
 
 export interface ICalculatorOptions {
@@ -7,7 +8,7 @@ export interface ICalculatorOptions {
     minOverflow: number;
     pointsCount: number;
     initPoints: 'random' | 'regular';
-    edge: 'transparent' | 'opaque' | 'reflect';
+    edge: () => TEdgeOps;
 }
 
 export class Calculator {
@@ -85,7 +86,7 @@ export class Calculator {
         // unless index is out of bounds: index > the number of points or index < 0
         // the value returned then is determined by the uncommented lines below
         if (index < 0) {
-            switch (this.options.edge) {
+            switch (this.options.edge()) {
                 case 'transparent':
                     return 0;
                 case 'opaque':
@@ -94,13 +95,13 @@ export class Calculator {
                     return this.points[1];
             }
         } else if (index > this.points.length - 1) {
-            switch (this.options.edge) {
+            switch (this.options.edge()) {
                 case 'transparent':
                     return 0;
                 case 'opaque':
-                    return this.points[this.options.width];
+                    return this.points[this.options.width - 1];
                 case 'reflect':
-                    return this.points[this.options.width - 1]; // reflective
+                    return this.points[this.options.width - 2]; // reflective
             }
         }
         return this.points[index];

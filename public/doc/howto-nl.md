@@ -1,6 +1,6 @@
 # Gebruiksaanwijzing
 
-CanticleJS is eenvoudig in het gebruik: klik "Start opnieuw", en CanticleJS begint je eerste afbeelding te genereren. Pas de instellingen aan om andere beelden te maken. Je moet de start knop opnieuw aanklikken om nieuwe instellingen zoals aantal startpunten en niveaus te gebruiken, die hebben geen invloed op de afbeelding die in ontwikkeling is. Een aantal instellingen werken wel direct op de afbeelding in ontwikkeling, deze zijn met een <span class="icon">📍</span> icoon gemarkeerd.
+CanticleJS is eenvoudig in het gebruik: klik de knop "Start opnieuw", en CanticleJS begint een nieuwe afbeelding te genereren. Pas de instellingen aan om andere beelden te maken. Je moet de start knop opnieuw aanklikken om nieuwe instellingen zoals aantal startpunten en niveaus te gebruiken, die hebben geen invloed op de afbeelding die in ontwikkeling is. Een aantal instellingen werken wel direct op de afbeelding in ontwikkeling, deze zijn met een <span class="icon">📍</span> icoon gemarkeerd.
 
 ### Formule
 
@@ -22,6 +22,10 @@ Dit regelt het aantal startpunten die de maximale waarde krijgen (op de eerste r
 
 Kruis dit aan om de startpunten willekeurig te verdelen over de eerste regel. Als dit uit staat worden de punten op regelmatige afstanden geplaatst.
 
+### Randgedrag
+
+Deze instelling bepaalt wat er gebeurt aan de randen (lins en rechts) van het beeld. Aangezien in die situatie ofwel ptNE ofwel ptNW ontbreekt, moet een waarde gekozen worden. Het effect van deze instelling is lastig uit te leggen, experimenteren is het devies. Deze instelling wordt direct overgenomen op een afbeelding die in ontwikkeling is.
+
 ### Scroll bij vol scherm
 
 Als dit aan staat gaat het beeld omhoog scrollen als de onderkant van het scherm is bereikt. Anders gaat het beeld weer bovenaan verder en overschrijft het de vorige 'pagina'. Deze instelling wordt direct overgenomen op een afbeelding die in ontwikkeling is.
@@ -30,9 +34,9 @@ Als dit aan staat gaat het beeld omhoog scrollen als de onderkant van het scherm
 
 Dit bepaalt wat er gebeurt als de combinatie van formule en niveaus alleen waardes van 0 en 1 oplevert. Aangezien het beeld dan snel oninteressant wordt. Deze instelling wordt direct overgenomen op een afbeelding die in ontwikkeling is. Zet dit uit en klik de knop "Ga door" het renderen te hervatten als het gestopt is door deze instelling.
 
-### (Max aantal) Iteraties
+### (Max) Iteraties
 
-Het aantal iteraties wordt lopend weergegeven bij "Iteraties:", De instelling "Max aantal iteraties" bepaalt wanneer de berekening stopt. Stel dit in op 0 om oneindig door te laten rekenen. (tenzij de bovenstaande instelling aan staat en er alleen 0 and 1's gegenereerd worden). Deze instelling wordt direct overgenomen op een afbeelding die in ontwikkeling is. Zet dit op een hogere waarde (of op 0) en klik de knop "Ga door" het renderen te hervatten als het gestopt is door deze instelling.
+Het aantal iteraties wordt lopend weergegeven bij "Iteraties:", De instelling "Max iteraties" bepaalt wanneer de berekening stopt. Stel dit in op 0 om oneindig door te laten rekenen. (tenzij de bovenstaande instelling aan staat en er alleen 0 and 1's gegenereerd worden). Deze instelling wordt direct overgenomen op een afbeelding die in ontwikkeling is. Zet dit op een hogere waarde (of op 0) en klik de knop "Ga door" het renderen te hervatten als het gestopt is door deze instelling.
 
 ### Pauzeer/Ga door
 

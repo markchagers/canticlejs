@@ -1,3 +1,5 @@
+import type { TEdgeOps } from './canticle';
+
 export interface IFormula {
     value: number;
     label: string;
@@ -13,6 +15,10 @@ export class Formula implements IFormula {
         readonly formula: (ptN: number, ptNW: number, ptNE: number) => number,
     ) {}
 }
+
+export const initEdges = (): TEdgeOps[] => {
+    return ['opaque', 'reflect', 'transparent'];
+};
 
 export const initFormulae = (): IFormula[] => {
     const formula: IFormula[] = [];

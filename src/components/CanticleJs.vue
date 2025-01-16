@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import { onMounted, ref, watch } from 'vue';
-    import { Canticle, type ICantOptions, type TColorChip } from '../process/canticle';
+    import { Canticle, type ICantOptions, type TColorChip, type TEdgeOps } from '../process/canticle';
     import type { IFormula } from '../process/formula';
     import { useLanguageStore, type TOption } from '../store/language';
     import DocViewer from './DocViewer.vue';
@@ -23,13 +23,17 @@
     const colorarea = ref<HTMLDetailsElement>();
     const helpvisible = ref(false);
     const depthvisible = ref(false);
+
     const colorChips = ref<TColorChip[]>([]);
     const stepCount = ref(32);
     const startCount = ref(1);
     const startRandom = ref(false);
+
+    const edgeBehavior = ref<TEdgeOps>()
     const scrolling = ref(true);
     const bgColor = ref('#000');
     const stop10 = ref(true);
+
     const pauseBtnText = ref(langStore.getLangString('Pauzeer'));
     const started = ref(false);
     const maxIterations = ref(30000);
@@ -38,6 +42,7 @@
     let canticle: Canticle | null;
 
     onMounted(() => {
+        edgeBehavior.value = 'transparent';
         selectedFormula.value = langStore.getFormulaByValue(0);
         selectedPalette.value = gradients[0];
         start();
@@ -85,7 +90,7 @@
                 maxIterations: () => maxIterations.value,
                 maxOverflow: 1,
                 minOverflow: 1,
-                edgeBehavior: 'transparent',
+                edgeBehavior: () => edgeBehavior.value ?? 'transparent',
                 initPoints: startRandom.value ? 'random' : 'regular',
                 initNumber: startCount.value,
                 stopOn10: () => stop10.value,
@@ -119,87 +124,117 @@
         <FormulaExplorer :formule="selectedFormula" v-if="depthvisible" @close="depthvisible = false">
         </FormulaExplorer>
         <div class="sidebar">
-            <h1>CanticleJS</h1>
-            <div class="langbtns">
-                <button class="lang" :class="{ active: langStore.lang === 'en' }" @click="langStore.lang = 'en'">
-                    🇬🇧
-                    <span>English</span>
-                </button>
-                <button class="lang" :class="{ active: langStore.lang === 'nl' }" @click="langStore.lang = 'nl'">
-                    🇳🇱
-                    <span>Nederlands</span>
-                </button>
-            </div>
-            <button @click="helpvisible = true">{{ langStore.getLangString('Wat is dit?') }}</button>
-            <div class="control">
-                <label for="formule" :title="langStore.getLangString('De formule waarmee gerekend wordt')">
-                    {{ langStore.getLangString('Formule') }}:
-                    <select name="formule" id="formule" v-model="selectedFormula">
-                        <option v-for="opt in langStore.getFormulae()" :key="opt.value" :value="opt">{{ opt.label }}
-                        </option>
-                    </select>
-                </label>
-                <button @click="depthvisible = true">{{ `${langStore.getLangString('Niveaus voor')}
-                    ${selectedFormula?.label}` }}</button>
-                <label for="stepcount" :title="langStore.getLangString('Aantal niveaus (kleuren) van de berekening')">
-                    {{ langStore.getLangString('Niveaus') }}:
-                    <input type="number" v-model="stepCount" id="stepcount" />
-                </label>
-                <label for="startcount" :title="langStore.getLangString('Het aantal startpunten')">
-                    {{ langStore.getLangString('Aantal startpunten') }}:
-                    <input type="number" v-model="startCount" id="startcount" />
-                </label>
-                <label for="checkrandom" :title="langStore.getLangString('Willekeurige verdeling van de startpunten')">
-                    <input id="checkrandom" type="checkbox" v-model="startRandom" />
-                    {{ langStore.getLangString('Random positie startpunten') }}
-                </label>
-                <label for="checkscroll" :title="langStore.getLangString('Scroll het beeld als het scherm vol is')">
-                    <input id="checkscroll" type="checkbox" v-model="scrolling" /><span class="icon"><span
-                            class="icon">📍</span></span>
-                    {{ langStore.getLangString('Scroll bij vol scherm') }}
-                </label>
-                <label for="checkstop" :title="langStore.getLangString('Stop als het oninteressant wordt')">
-                    <input id="checkstop" type="checkbox" v-model="stop10" /><span class="icon">📍</span>
-                    {{ langStore.getLangString('Stop bij alleen 1 of 0') }}
-                </label>
-                <span :title="langStore.getLangString('Aantal gegenereerde regels')">{{
-                    langStore.getLangString('Iteraties') }}: {{ iterations }}</span>
-                <label for="maxiterations"
-                    :title="langStore.getLangString('Maximum aantal iteraties (0 = geen limiet)')"><span
-                        class="icon">📍</span>
-                    {{ langStore.getLangString('Max aantal iteraties') }}:
-                    <input type="number" class="long" v-model="maxIterations" id="maxiterations" />
-                </label>
-                <button :disabled="!started" @click="pauseResume()">{{ pauseBtnText }}</button>
-            </div>
-            <details ref="colorarea" @click.stop="undefined">
-                <summary>{{ langStore.getLangString('Kleuren') }}:</summary>
-                <span>{{ langStore.getLangString('Palet') }}:</span>
-
-                <div class="palettes" :title="langStore.getLangString('Kies het kleurenpalet en de achtergrondkleur')">
-                    <label v-for="grad in gradients" :key="grad.label" :for="grad.label">
-                        <input type="radio" name="gradient" v-model="selectedPalette" :value="grad" :id="grad.label" />
-                        <div class="gradient" :style="{ 'background-image': 'url(' + grad.value + ')' }"></div>
-                    </label>
-                    <span><span class="icon">📍</span> {{ langStore.getLangString('Achtergrondkleur') }}:</span>
-                    <label>
-                        <label for="zwart">
-                            <input type="radio" name="background" v-model="bgColor" value="#000" id="zwart" />
-                            {{ langStore.getLangString('Zwart') }}
-                        </label>
-                        <label for="wit">
-                            <input type="radio" name="background" v-model="bgColor" value="#fff" id="wit" />
-                            {{ langStore.getLangString('Wit') }}
-                        </label>
-                        <label for="grijs">
-                            <input type="radio" name="background" v-model="bgColor" value="#ccc" id="grijs" />
-                            {{ langStore.getLangString('Grijs') }}
-                        </label>
-                    </label>
+            <div class="sidebar-section-fixed">
+                <h1>CanticleJS</h1>
+                <div class="control">
+                    <div class="langbtns">
+                        <button class="lang" :class="{ active: langStore.lang === 'en' }"
+                            @click="langStore.lang = 'en'">
+                            🇬🇧
+                            <span>English</span>
+                        </button>
+                        <button class="lang" :class="{ active: langStore.lang === 'nl' }"
+                            @click="langStore.lang = 'nl'">
+                            🇳🇱
+                            <span>Nederlands</span>
+                        </button>
+                    </div>
+                    <button @click="helpvisible = true">{{ langStore.getLangString('Wat is dit?') }}</button>
+                    <button @click="start()"
+                        :title="langStore.getLangString('Start een nieuwe afbeelding met de huidige instellingen')">{{
+                            langStore.getLangString('Start opnieuw') }}</button>
                 </div>
-            </details>
-            <div class="control">
-                <button @click="start()">{{ langStore.getLangString('Start opnieuw') }}</button>
+            </div>
+            <div class="sidebar-section-scroll">
+                <div class="side-container">
+                    <div class="control">
+                        <label for="formule" :title="langStore.getLangString('De formule waarmee gerekend wordt')">
+                            {{ langStore.getLangString('Formule') }}:
+                            <select name="formule" id="formule" v-model="selectedFormula">
+                                <option v-for="opt in langStore.getFormulae()" :key="opt.value" :value="opt">{{
+                                    opt.label }}
+                                </option>
+                            </select>
+                        </label>
+                        <button @click="depthvisible = true">{{ `${langStore.getLangString('Niveaus voor')}
+                            ${selectedFormula?.label}` }}</button>
+                        <label for="stepcount"
+                            :title="langStore.getLangString('Aantal niveaus (kleuren) van de berekening')">
+                            {{ langStore.getLangString('Niveaus') }}:
+                            <input type="number" v-model="stepCount" id="stepcount" />
+                        </label>
+                        <label for="startcount" :title="langStore.getLangString('Het aantal startpunten')">
+                            {{ langStore.getLangString('Aantal startpunten') }}:
+                            <input type="number" v-model="startCount" id="startcount" />
+                        </label>
+                        <label for="checkrandom"
+                            :title="langStore.getLangString('Willekeurige verdeling van de startpunten')">
+                            <input id="checkrandom" type="checkbox" v-model="startRandom" />
+                            {{ langStore.getLangString('Random positie startpunten') }}
+                        </label>
+                        <label for="edge" :title="langStore.getLangString('Wat gebeurt aan de randen')">
+                            {{ langStore.getLangString('Randgedrag') }}:
+                            <span class="icon"
+                                :title="langStore.getLangString('Deze instelling werkt direct op de huidige afbeelding')">📍</span>
+                            <select name="edge" id="edge" v-model="edgeBehavior">
+                                <option v-for="opt in langStore.getEdgeValues()" :key="`${opt}`" :value="opt">{{ opt }}
+                                </option>
+                            </select>
+                        </label>
+                        <label for="checkscroll"
+                            :title="langStore.getLangString('Scroll het beeld als het scherm vol is')">
+                            <input id="checkscroll" type="checkbox" v-model="scrolling" />
+                            <span class="icon"
+                                :title="langStore.getLangString('Deze instelling werkt direct op de huidige afbeelding')">📍</span>
+                            {{ langStore.getLangString('Scroll bij vol scherm') }}
+                        </label>
+                        <label for="checkstop" :title="langStore.getLangString('Stop als het oninteressant wordt')">
+                            <input id="checkstop" type="checkbox" v-model="stop10" /><span class="icon"
+                                :title="langStore.getLangString('Deze instelling werkt direct op de huidige afbeelding')">📍</span>
+                            {{ langStore.getLangString('Stop bij alleen 1 of 0') }}
+                        </label>
+                        <span :title="langStore.getLangString('Aantal gegenereerde regels')">{{
+                            langStore.getLangString('Iteraties') }}: {{ iterations }}</span>
+                        <label for="maxiterations"
+                            :title="langStore.getLangString('Maximum aantal iteraties (0 = geen limiet)')"><span
+                                class="icon"
+                                :title="langStore.getLangString('Deze instelling werkt direct op de huidige afbeelding')">📍</span>
+                            {{ langStore.getLangString('Max iteraties') }}:
+                            <input type="number" class="long" v-model="maxIterations" id="maxiterations" />
+                        </label>
+                        <button :disabled="!started" @click="pauseResume()">{{ pauseBtnText }}</button>
+                    </div>
+                    <details ref="colorarea" @click.stop="undefined">
+                        <summary>{{ langStore.getLangString('Kleuren') }}:</summary>
+                        <span>{{ langStore.getLangString('Palet') }}:</span>
+
+                        <div class="palettes"
+                            :title="langStore.getLangString('Kies het kleurenpalet en de achtergrondkleur')">
+                            <label v-for="grad in gradients" :key="grad.label" :for="grad.label">
+                                <input type="radio" name="gradient" v-model="selectedPalette" :value="grad"
+                                    :id="grad.label" />
+                                <div class="gradient" :style="{ 'background-image': 'url(' + grad.value + ')' }"></div>
+                            </label>
+                            <span><span class="icon"
+                                    :title="langStore.getLangString('Deze instelling werkt direct op de huidige afbeelding')">📍</span>
+                                {{ langStore.getLangString('Achtergrondkleur') }}:</span>
+                            <label>
+                                <label for="zwart">
+                                    <input type="radio" name="background" v-model="bgColor" value="#000" id="zwart" />
+                                    {{ langStore.getLangString('Zwart') }}
+                                </label>
+                                <label for="wit">
+                                    <input type="radio" name="background" v-model="bgColor" value="#fff" id="wit" />
+                                    {{ langStore.getLangString('Wit') }}
+                                </label>
+                                <label for="grijs">
+                                    <input type="radio" name="background" v-model="bgColor" value="#ccc" id="grijs" />
+                                    {{ langStore.getLangString('Grijs') }}
+                                </label>
+                            </label>
+                        </div>
+                    </details>
+                </div>
             </div>
         </div>
         <div class="canticle">
@@ -220,15 +255,35 @@
     }
 
     .sidebar {
-        flex: 0 0 320px;
-        width: 320px;
+        height: 100vh;
+        background-color: var(--color-background-soft);
+        display: flex;
+        flex-flow: column nowrap;
+        gap: 8px;
+    }
+
+    .sidebar-section-fixed {
+        flex: 0 0 200px;
         padding: 10px 32px;
         display: flex;
         flex-flow: column nowrap;
         align-items: stretch;
-        height: 100vh;
         gap: 16px;
-        background-color: var(--color-background-soft);
+    }
+
+    .sidebar-section-scroll {
+        flex: 1 0 calc(100vh - 200px);
+        padding: 10px 32px;
+        overflow-y: scroll;
+    }
+
+    .side-container {
+        flex: 0 0 340px;
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: stretch;
+        gap: 16px;
+        height: fit-content;
     }
 
     .colors {

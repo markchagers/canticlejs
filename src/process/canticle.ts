@@ -3,6 +3,7 @@
 import { Calculator, type ICalculatorOptions } from './calculator';
 import type { IFormula } from './formula';
 
+export type TEdgeOps = 'transparent' | 'opaque' | 'reflect';
 export interface ICantOptions {
     background: () => string;
     formule: IFormula;
@@ -10,7 +11,7 @@ export interface ICantOptions {
     maxIterations: () => number;
     maxOverflow: number;
     minOverflow: number;
-    edgeBehavior: 'transparent' | 'opaque' | 'reflect';
+    edgeBehavior: () => TEdgeOps;
     initPoints: 'random' | 'regular';
     initNumber: number;
     stopOn10: () => boolean;
@@ -71,7 +72,7 @@ export class Canticle {
             minOverflow: this.options.minOverflow,
             pointsCount: this.options.initNumber,
             initPoints: this.options.initPoints,
-            edge: this.options.edgeBehavior,
+            edge: () => this.options.edgeBehavior(),
         };
         this.calculator = new Calculator();
         this.calculator.setupCALine(calcOpts);

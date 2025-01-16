@@ -11,7 +11,7 @@ test('init', () => {
         initPoints: 'regular',
         pointsCount: 1,
         width: 100,
-        edge: 'transparent',
+        edge: () => 'transparent',
     };
 
     const sut = new Calculator();
@@ -29,7 +29,7 @@ test('calcDepth', () => {
         initPoints: 'regular',
         pointsCount: 1,
         width: 1001,
-        edge: 'transparent',
+        edge: () => 'transparent',
     };
 
     const sut = new Calculator();

@@ -1,6 +1,6 @@
 # Manual
 
-Using CanticleJS is simple: just click the button "Start over", and CanticleJS will start generating your first image. You can change the settings to create different images. You have to click the start button again to apply changed settings such as starting points and levels, they will not affect an image being rendered. Some other properties do affest the image being rendered, these are marked with a <span class="icon">📍</span> icon.
+Using CanticleJS is simple: just click the button "Start over", and CanticleJS will start generating a fresh image. You can change the settings to create different images. You have to click the start button again to apply changed settings such as starting points and levels, they will not affect an image being rendered. Some other properties do affest the image being rendered, these are marked with a <span class="icon">📍</span> icon.
 
 ### Formula
 
@@ -18,6 +18,10 @@ Set the levels for the chosen formula here. This will also determine the number 
 ### Number of initial points
 
 This determines the number of points that will be initialized to the maximum value (on the first line).
+
+### Edge behavior
+
+This setting determines what happens at the edges (left and right) of the image. Since either the point ptNE or ptNW is missing in these situations a value needs to be substituted. Hte effect of this setting is hard to explain, experiment, YMMV. This setting will be applied to an image being rendered.
 
 ### Random positions
 

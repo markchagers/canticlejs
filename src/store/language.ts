@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { initFormulae } from '../process/formula';
+import { initEdges, initFormulae } from '../process/formula';
 
 const langMap = new Map<string, string>([
     ['Wat is CanticleJS?', 'What is CanticleJS?'],
@@ -11,12 +11,12 @@ const langMap = new Map<string, string>([
     ['formule', 'formula'],
     ['Pauzeer', 'Pause'],
     ['Ga door', 'Continue'],
-    ['Stappen', 'Steps'],
     ['Niveaus', 'Levels'],
     ['Aantal startpunten', 'Number of initial points'],
     ['Random positie startpunten', 'Random positions'],
     ['Scroll bij vol scherm', 'Scroll on full screen'],
     ['Stop bij alleen 1 of 0', 'Stop on just 1 or 0'],
+    ['Start een nieuwe afbeelding met de huidige instellingen', 'Start a new render with the current settings'],
     ['Kleuren', 'Colors'],
     ['Palet', 'Palette'],
     ['Achtergrondkleur', 'Background color'],
@@ -26,7 +26,7 @@ const langMap = new Map<string, string>([
     ['Start opnieuw', 'Start over'],
     ['Iteraties', 'Iterations'],
     ['Aantal gegenereerde regels', 'Number of lines generated'],
-    ['Max aantal iteraties', 'Max iterations'],
+    ['Max iteraties', 'Max iterations'],
     ['De formule waarmee gerekend wordt', 'The formula generating the image'],
     ['Aantal niveaus (kleuren) van de berekening', 'Number of levels (colors) of the calculation'],
     ['Het aantal startpunten', 'The number of initial points'],
@@ -37,6 +37,9 @@ const langMap = new Map<string, string>([
     ['Kies het kleurenpalet en de achtergrondkleur', 'Choose color palette and background color'],
     ['Niveaus voor', 'Levels for'],
     ['Herhalingen', 'Repetitions'],
+    ['Deze instelling werkt direct op de huidige afbeelding', 'This setting affects the current image directly'],
+    ['Randgedrag', 'Edge behavior'],
+    ['Wat gebeurt aan de randen', 'What happens at the image edges'],
 ]);
 
 export type TOption = {
@@ -71,6 +74,8 @@ const getFormulaByValue = (value: number) => {
 };
 
 export const useLanguageStore = defineStore('language', () => {
+    const getEdgeValues = () => initEdges();
+
     const getFormulae = () => {
         const form = initFormulae();
         if (lang.value === 'en') {
@@ -79,5 +84,5 @@ export const useLanguageStore = defineStore('language', () => {
         return form;
     };
 
-    return { lang, getLangString, getFormulae, getFormulaByValue };
+    return { lang, getLangString, getFormulae, getFormulaByValue, getEdgeValues };
 });
