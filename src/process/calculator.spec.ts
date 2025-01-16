@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
+import { initFormulae } from '../types/formula';
 import { Calculator, type ICalculatorOptions } from './calculator';
-import { initFormulae } from './formula';
 
 const formulae = initFormulae();
 test('init', () => {

@@ -25,6 +25,7 @@ button {
     width: fit-content;
     padding: 5px 16px;
     height: unset;
+    cursor: pointer;
 }
 
 a:link {
@@ -41,9 +42,6 @@ input[type='number'] {
 }
 
 select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
     padding: 4px 10px;
     font-size: 1rem;
     border-radius: 4px;

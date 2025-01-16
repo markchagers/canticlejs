@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { initEdges, initFormulae } from '../process/formula';
+import { initEdges } from '../types/edges';
+import { initFormulae } from '../types/formula';
 
 const langMap = new Map<string, string>([
     ['Wat is CanticleJS?', 'What is CanticleJS?'],
@@ -42,39 +43,33 @@ const langMap = new Map<string, string>([
     ['Wat gebeurt aan de randen', 'What happens at the image edges'],
 ]);
 
-export type TOption = {
-    label: string;
-    value: number | string;
-};
-
-const lang = ref<'nl' | 'en'>(navigator.language.startsWith('nl') ? 'nl' : 'en');
-
-const getLangString = (key: string) => {
-    if (lang.value !== 'nl') {
-        if (`${parseFloat(key)}` === key) {
-            return key;
-        }
-        return langMap.get(key) ?? `missing: ${key}`;
-    }
-    return key;
-};
-
-const translate = (s: string) => {
-    const words = s.split(' ');
-    return words.map(w => getLangString(w)).join(' ');
-};
-
-const getFormulaByValue = (value: number) => {
-    const form = initFormulae();
-    const formul = form.find(f => f.value === value) ?? form[0];
-    if (lang.value === 'en') {
-        formul.label = translate(formul.label);
-    }
-    return formul;
-};
-
 export const useLanguageStore = defineStore('language', () => {
+    const lang = ref<'nl' | 'en'>(navigator.language.startsWith('nl') ? 'nl' : 'en');
     const getEdgeValues = () => initEdges();
+
+    const translate = (s: string) => {
+        const words = s.split(' ');
+        return words.map(w => getLangString(w)).join(' ');
+    };
+
+    const getLangString = (key: string) => {
+        if (lang.value !== 'nl') {
+            if (`${parseFloat(key)}` === key) {
+                return key;
+            }
+            return langMap.get(key) ?? `missing: ${key}`;
+        }
+        return key;
+    };
+
+    const getFormulaByValue = (value: number) => {
+        const form = initFormulae();
+        const formul = form.find(f => f.id === value) ?? form[0];
+        if (lang.value === 'en') {
+            formul.label = translate(formul.label);
+        }
+        return formul;
+    };
 
     const getFormulae = () => {
         const form = initFormulae();

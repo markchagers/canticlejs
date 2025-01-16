@@ -1,9 +1,9 @@
 // set some other properties
 
+import type { TEdgeOps } from '../types/edges';
+import type { IFormula } from '../types/formula';
 import { Calculator, type ICalculatorOptions } from './calculator';
-import type { IFormula } from './formula';
 
-export type TEdgeOps = 'transparent' | 'opaque' | 'reflect';
 export interface ICantOptions {
     background: () => string;
     formule: IFormula;

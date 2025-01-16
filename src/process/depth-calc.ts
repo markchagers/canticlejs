@@ -1,5 +1,5 @@
+import { initFormulae, type IFormula } from '../types/formula.ts';
 import { Calculator, type ICalculatorOptions } from './calculator.ts';
-import { initFormulae, type IFormula } from './formula.ts';
 
 const testFormula = (formule: IFormula, depth: number, minDepth: number) => {
     for (let i = 0; i < 256; i++) {

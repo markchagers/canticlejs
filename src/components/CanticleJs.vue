@@ -1,63 +1,31 @@
 <script setup lang="ts">
-    import { onMounted, ref, watch } from 'vue';
-    import { Canticle, type ICantOptions, type TColorChip, type TEdgeOps } from '../process/canticle';
-    import type { IFormula } from '../process/formula';
-    import { useLanguageStore, type TOption } from '../store/language';
+    import { onMounted, ref } from 'vue';
+    import { Canticle, type ICantOptions, type TColorChip } from '../process/canticle';
+    import { useLanguageStore } from '../store/language';
+    import { useSettingsStore } from '../store/settings';
+    import { gradients } from '../types/gradient';
     import DocViewer from './DocViewer.vue';
     import FormulaExplorer from './FormulaExplorer.vue';
 
     const langStore = useLanguageStore();
-    const selectedFormula = ref<IFormula>();
-    const selectedPalette = ref<TOption>();
+    const settings = useSettingsStore();
 
-    const gradients: TOption[] = [
-        { value: '/canticle/gradients/gradient-1.png', label: 'gradient-1' },
-        { value: '/canticle/gradients/gradient-2.png', label: 'gradient-2' },
-        { value: '/canticle/gradients/gradient-3.png', label: 'gradient-3' },
-        { value: '/canticle/gradients/gradient-4.png', label: 'gradient-4' },
-        { value: '/canticle/gradients/gradient-5.png', label: 'gradient-5' },
-        { value: '/canticle/gradients/gradient-6.png', label: 'gradient-6' },
-        { value: '/canticle/gradients/gradient-7.png', label: 'gradient-7' },
-    ];
-
+    const cantvas = ref<HTMLCanvasElement>();
     const colorarea = ref<HTMLDetailsElement>();
+
     const helpvisible = ref(false);
     const depthvisible = ref(false);
 
     const colorChips = ref<TColorChip[]>([]);
-    const stepCount = ref(32);
-    const startCount = ref(1);
-    const startRandom = ref(false);
-
-    const edgeBehavior = ref<TEdgeOps>()
-    const scrolling = ref(true);
-    const bgColor = ref('#000');
-    const stop10 = ref(true);
 
     const pauseBtnText = ref(langStore.getLangString('Pauzeer'));
     const started = ref(false);
-    const maxIterations = ref(30000);
     const iterations = ref<number>(0);
-    const cantvas = ref<HTMLCanvasElement>();
     let canticle: Canticle | null;
 
     onMounted(() => {
-        edgeBehavior.value = 'transparent';
-        selectedFormula.value = langStore.getFormulaByValue(0);
-        selectedPalette.value = gradients[0];
         start();
     });
-
-    watch(
-        () => langStore.lang,
-        () => {
-            const val = selectedFormula.value
-            const menu = langStore.getFormulae();
-            const newVal = menu.find(m => m.value === val?.value) ?? menu[0];
-            selectedFormula.value = newVal
-        },
-        { immediate: true }
-    )
 
     const pauseResume = () => {
         canticle?.pauseResume();
@@ -71,7 +39,7 @@
 
     const start = () => {
         cleanUp();
-        const selected = selectedFormula.value;
+        const selected = langStore.getFormulaByValue(settings.selectedFormula);
         if (!cantvas.value || !selected) {
             return;
         }
@@ -84,17 +52,17 @@
         image.onload = () => {
             bitmap.drawImage(image, 0, 0);
             const cantOpts: ICantOptions = {
-                background: () => bgColor.value,
+                background: () => settings.bgColor,
                 formule: selected,
-                levels: stepCount.value,
-                maxIterations: () => maxIterations.value,
+                levels: settings.levelCount,
+                maxIterations: () => settings.maxIterations,
                 maxOverflow: 1,
                 minOverflow: 1,
-                edgeBehavior: () => edgeBehavior.value ?? 'transparent',
-                initPoints: startRandom.value ? 'random' : 'regular',
-                initNumber: startCount.value,
-                stopOn10: () => stop10.value,
-                scrolling: () => scrolling.value,
+                edgeBehavior: () => settings.edgeBehavior ?? 'transparent',
+                initPoints: settings.startRandom ? 'random' : 'regular',
+                initNumber: settings.startCount,
+                stopOn10: () => settings.stop10,
+                scrolling: () => settings.scrolling,
                 paletteImage: bitmap
             };
 
@@ -108,7 +76,7 @@
             started.value = true;
             pauseBtnText.value = langStore.getLangString('Pauzeer');
         }
-        image.src = (selectedPalette.value?.value as string) ?? '/canticle/gradients/gradient-1.png';
+        image.src = (gradients.find(g => g.id === settings.selectedPalette)?.value as string) ?? '/canticle/gradients/gradient-1.png';
     };
 
     const closeColors = () => {
@@ -121,7 +89,7 @@
 <template>
     <div class="main" v-on:click="closeColors()">
         <DocViewer v-if="helpvisible" :language="langStore.lang" @close="helpvisible = false"></DocViewer>
-        <FormulaExplorer :formule="selectedFormula" v-if="depthvisible" @close="depthvisible = false">
+        <FormulaExplorer v-if="depthvisible" @close="depthvisible = false">
         </FormulaExplorer>
         <div class="sidebar">
             <div class="sidebar-section-fixed">
@@ -140,7 +108,7 @@
                         </button>
                     </div>
                     <button @click="helpvisible = true">{{ langStore.getLangString('Wat is dit?') }}</button>
-                    <button @click="start()"
+                    <button @click="start()" class="default"
                         :title="langStore.getLangString('Start een nieuwe afbeelding met de huidige instellingen')">{{
                             langStore.getLangString('Start opnieuw') }}</button>
                 </div>
@@ -150,46 +118,46 @@
                     <div class="control">
                         <label for="formule" :title="langStore.getLangString('De formule waarmee gerekend wordt')">
                             {{ langStore.getLangString('Formule') }}:
-                            <select name="formule" id="formule" v-model="selectedFormula">
-                                <option v-for="opt in langStore.getFormulae()" :key="opt.value" :value="opt">{{
+                            <select name="formule" id="formule" v-model="settings.selectedFormula">
+                                <option v-for="opt in langStore.getFormulae()" :key="opt.id" :value="opt.id">{{
                                     opt.label }}
                                 </option>
                             </select>
                         </label>
                         <button @click="depthvisible = true">{{ `${langStore.getLangString('Niveaus voor')}
-                            ${selectedFormula?.label}` }}</button>
-                        <label for="stepcount"
+                            ${langStore.getFormulaByValue(settings.selectedFormula).label}` }}</button>
+                        <label for="levelCount"
                             :title="langStore.getLangString('Aantal niveaus (kleuren) van de berekening')">
                             {{ langStore.getLangString('Niveaus') }}:
-                            <input type="number" v-model="stepCount" id="stepcount" />
+                            <input type="number" v-model="settings.levelCount" id="levelCount" />
                         </label>
                         <label for="startcount" :title="langStore.getLangString('Het aantal startpunten')">
                             {{ langStore.getLangString('Aantal startpunten') }}:
-                            <input type="number" v-model="startCount" id="startcount" />
+                            <input type="number" v-model="settings.startCount" id="startcount" />
                         </label>
                         <label for="checkrandom"
                             :title="langStore.getLangString('Willekeurige verdeling van de startpunten')">
-                            <input id="checkrandom" type="checkbox" v-model="startRandom" />
+                            <input id="checkrandom" type="checkbox" v-model="settings.startRandom" />
                             {{ langStore.getLangString('Random positie startpunten') }}
                         </label>
                         <label for="edge" :title="langStore.getLangString('Wat gebeurt aan de randen')">
                             {{ langStore.getLangString('Randgedrag') }}:
                             <span class="icon"
                                 :title="langStore.getLangString('Deze instelling werkt direct op de huidige afbeelding')">📍</span>
-                            <select name="edge" id="edge" v-model="edgeBehavior">
+                            <select name="edge" id="edge" v-model="settings.edgeBehavior">
                                 <option v-for="opt in langStore.getEdgeValues()" :key="`${opt}`" :value="opt">{{ opt }}
                                 </option>
                             </select>
                         </label>
                         <label for="checkscroll"
                             :title="langStore.getLangString('Scroll het beeld als het scherm vol is')">
-                            <input id="checkscroll" type="checkbox" v-model="scrolling" />
+                            <input id="checkscroll" type="checkbox" v-model="settings.scrolling" />
                             <span class="icon"
                                 :title="langStore.getLangString('Deze instelling werkt direct op de huidige afbeelding')">📍</span>
                             {{ langStore.getLangString('Scroll bij vol scherm') }}
                         </label>
                         <label for="checkstop" :title="langStore.getLangString('Stop als het oninteressant wordt')">
-                            <input id="checkstop" type="checkbox" v-model="stop10" /><span class="icon"
+                            <input id="checkstop" type="checkbox" v-model="settings.stop10" /><span class="icon"
                                 :title="langStore.getLangString('Deze instelling werkt direct op de huidige afbeelding')">📍</span>
                             {{ langStore.getLangString('Stop bij alleen 1 of 0') }}
                         </label>
@@ -200,7 +168,7 @@
                                 class="icon"
                                 :title="langStore.getLangString('Deze instelling werkt direct op de huidige afbeelding')">📍</span>
                             {{ langStore.getLangString('Max iteraties') }}:
-                            <input type="number" class="long" v-model="maxIterations" id="maxiterations" />
+                            <input type="number" class="long" v-model="settings.maxIterations" id="maxiterations" />
                         </label>
                         <button :disabled="!started" @click="pauseResume()">{{ pauseBtnText }}</button>
                     </div>
@@ -210,8 +178,8 @@
 
                         <div class="palettes"
                             :title="langStore.getLangString('Kies het kleurenpalet en de achtergrondkleur')">
-                            <label v-for="grad in gradients" :key="grad.label" :for="grad.label">
-                                <input type="radio" name="gradient" v-model="selectedPalette" :value="grad"
+                            <label v-for="grad in gradients" :key="grad.id" :for="grad.label">
+                                <input type="radio" name="gradient" v-model="settings.selectedPalette" :value="grad.id"
                                     :id="grad.label" />
                                 <div class="gradient" :style="{ 'background-image': 'url(' + grad.value + ')' }"></div>
                             </label>
@@ -220,15 +188,18 @@
                                 {{ langStore.getLangString('Achtergrondkleur') }}:</span>
                             <label>
                                 <label for="zwart">
-                                    <input type="radio" name="background" v-model="bgColor" value="#000" id="zwart" />
+                                    <input type="radio" name="background" v-model="settings.bgColor" value="#000"
+                                        id="zwart" />
                                     {{ langStore.getLangString('Zwart') }}
                                 </label>
                                 <label for="wit">
-                                    <input type="radio" name="background" v-model="bgColor" value="#fff" id="wit" />
+                                    <input type="radio" name="background" v-model="settings.bgColor" value="#fff"
+                                        id="wit" />
                                     {{ langStore.getLangString('Wit') }}
                                 </label>
                                 <label for="grijs">
-                                    <input type="radio" name="background" v-model="bgColor" value="#ccc" id="grijs" />
+                                    <input type="radio" name="background" v-model="settings.bgColor" value="#ccc"
+                                        id="grijs" />
                                     {{ langStore.getLangString('Grijs') }}
                                 </label>
                             </label>
@@ -259,26 +230,39 @@
         background-color: var(--color-background-soft);
         display: flex;
         flex-flow: column nowrap;
-        gap: 8px;
     }
 
     .sidebar-section-fixed {
         flex: 0 0 200px;
-        padding: 10px 32px;
+        padding: 0 32px;
         display: flex;
         flex-flow: column nowrap;
         align-items: stretch;
-        gap: 16px;
+        gap: 8px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .sidebar-section-fixed .control {
+        gap: 14px;
+    }
+
+    button.default {
+        background-color: #3200d8;
+        color: white;
+    }
+
+    button.default:hover {
+        background-color: #554ee6;
     }
 
     .sidebar-section-scroll {
         flex: 1 0 calc(100vh - 200px);
-        padding: 10px 32px;
         overflow-y: scroll;
     }
 
     .side-container {
         flex: 0 0 340px;
+        padding: 16px 32px;
         display: flex;
         flex-flow: column nowrap;
         align-items: stretch;

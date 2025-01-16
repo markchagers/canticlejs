@@ -1,5 +1,5 @@
+import type { IFormula } from '../types/formula';
 import type { TEdgeOps } from './canticle';
-import type { IFormula } from './formula';
 
 export interface ICalculatorOptions {
     width: number;
